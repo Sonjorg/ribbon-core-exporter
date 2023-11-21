@@ -4,7 +4,7 @@ import (
 	"encoding/xml"
 	"fmt"
 
-	"sonus-metrics-exporter/lib"
+	"core-exporter/lib"
 
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
@@ -12,7 +12,7 @@ import (
 
 const (
 	ipInterfaceName           = "IPInterface"
-	ipInterfaceGroupURLFormat = "%s/operational/addressContext/%s/ipInterfaceGroup/%s/ipInterfaceStatus/"
+	ipInterfaceGroupURLFormat = "%s/restconf/data/sonusAddressContext:addressContext=%s/sonusIpInterface:ipInterfaceGroup=%s"
 )
 
 var IPInterfaceMetric = lib.SonusMetric{
@@ -29,38 +29,38 @@ func getIPInterfaceGroupUrl(ctx lib.MetricContext) string {
 
 var ipInterfaceMetrics = map[string]*prometheus.Desc{
 	"IPInterface_Oper_Status": prometheus.NewDesc(
-		prometheus.BuildFQName("sonus", "ipinterface", "status"),
+		prometheus.BuildFQName("ribbon", "ipinterface", "status"),
 		"Current status of ipInterfaceGroup",
 		[]string{"name", "status_text"}, nil,
 	),
 	"IPInterface_Packets_Received": prometheus.NewDesc(
-		prometheus.BuildFQName("sonus", "ipinterface", "rxpackets"),
+		prometheus.BuildFQName("ribbon", "ipinterface", "rxpackets"),
 		"Number of packets received on ipInterfaceGroup",
 		[]string{"name"}, nil,
 	),
 	"IPInterface_Packets_Transmitted": prometheus.NewDesc(
-		prometheus.BuildFQName("sonus", "ipinterface", "txpackets"),
+		prometheus.BuildFQName("ribbon", "ipinterface", "txpackets"),
 		"Number of packets transmitted on ipInterfaceGroup",
 		[]string{"name"}, nil,
 	),
 	"IPInterface_Bandwidth_Receive": prometheus.NewDesc(
-		prometheus.BuildFQName("sonus", "ipinterface", "rxbandwidth"),
+		prometheus.BuildFQName("ribbon", "ipinterface", "rxbandwidth"),
 		"Receive bandwidth in use on interface, in bytes per second",
 		[]string{"name"}, nil,
 	),
 	"IPInterface_Bandwidth_Transmit": prometheus.NewDesc(
-		prometheus.BuildFQName("sonus", "ipinterface", "txbandwidth"),
+		prometheus.BuildFQName("ribbon", "ipinterface", "txbandwidth"),
 		"Transmit bandwidth in use on interface, in bytes per second",
 		[]string{"name"}, nil,
 	),
 	"IPInterface_Media_Streams": prometheus.NewDesc(
-		prometheus.BuildFQName("sonus", "ipinterface", "media_streams"),
+		prometheus.BuildFQName("ribbon", "ipinterface", "media_streams"),
 		"Number of media streams currently on ipInterfaceGroup",
 		[]string{"name"}, nil,
 	),
 }
 
-func processIPInterfaceStatus(ctx lib.MetricContext, xmlBody *[]byte) {
+func processIPInterfaceStatus(ctx lib.MetricContext, xmlBody *[]byte,system []string) {
 	var (
 		errors       []*error
 		ipInterfaces = new(ipInterfaceStatusCollection)
@@ -81,15 +81,15 @@ func processIPInterfaceStatus(ctx lib.MetricContext, xmlBody *[]byte) {
 	}
 
 	for _, ipInterfaceGroup := range ipInterfaces.IPInterfaces {
-		ctx.MetricChannel <- prometheus.MustNewConstMetric(ipInterfaceMetrics["IPInterface_Oper_Status"], prometheus.GaugeValue, ipInterfaceGroup.operStateToMetric(), ipInterfaceGroup.Name, ipInterfaceGroup.OperState)
+		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(ipInterfaceMetrics["IPInterface_Oper_Status"], prometheus.GaugeValue, ipInterfaceGroup.operStateToMetric(), ipInterfaceGroup.Name, ipInterfaceGroup.OperState))
 
-		ctx.MetricChannel <- prometheus.MustNewConstMetric(ipInterfaceMetrics["IPInterface_Packets_Received"], prometheus.CounterValue, ipInterfaceGroup.RxPackets, ipInterfaceGroup.Name)
-		ctx.MetricChannel <- prometheus.MustNewConstMetric(ipInterfaceMetrics["IPInterface_Packets_Transmitted"], prometheus.CounterValue, ipInterfaceGroup.TxPackets, ipInterfaceGroup.Name)
+		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(ipInterfaceMetrics["IPInterface_Packets_Received"], prometheus.CounterValue, ipInterfaceGroup.RxPackets, ipInterfaceGroup.Name))
+		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(ipInterfaceMetrics["IPInterface_Packets_Transmitted"], prometheus.CounterValue, ipInterfaceGroup.TxPackets, ipInterfaceGroup.Name))
 
-		ctx.MetricChannel <- prometheus.MustNewConstMetric(ipInterfaceMetrics["IPInterface_Bandwidth_Receive"], prometheus.GaugeValue, ipInterfaceGroup.RxActualBandwidth, ipInterfaceGroup.Name)
-		ctx.MetricChannel <- prometheus.MustNewConstMetric(ipInterfaceMetrics["IPInterface_Bandwidth_Transmit"], prometheus.GaugeValue, ipInterfaceGroup.TxActualBandwidth, ipInterfaceGroup.Name)
+		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(ipInterfaceMetrics["IPInterface_Bandwidth_Receive"], prometheus.GaugeValue, ipInterfaceGroup.RxActualBandwidth, ipInterfaceGroup.Name))
+		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(ipInterfaceMetrics["IPInterface_Bandwidth_Transmit"], prometheus.GaugeValue, ipInterfaceGroup.TxActualBandwidth, ipInterfaceGroup.Name))
 
-		ctx.MetricChannel <- prometheus.MustNewConstMetric(ipInterfaceMetrics["IPInterface_Media_Streams"], prometheus.GaugeValue, ipInterfaceGroup.NumMediaStreams, ipInterfaceGroup.Name)
+		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(ipInterfaceMetrics["IPInterface_Media_Streams"], prometheus.GaugeValue, ipInterfaceGroup.NumMediaStreams, ipInterfaceGroup.Name))
 	}
 
 	log.Infof("IP Interface Metrics for Address Context %q, ipInterfaceGroup %q collected", ctx.AddressContext, ctx.IPInterfaceGroup)

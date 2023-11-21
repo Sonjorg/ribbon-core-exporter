@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"sonus-metrics-exporter/lib"
+	"core-exporter/lib"
 
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
@@ -13,7 +13,7 @@ import (
 
 const (
 	fanName      = "Fan"
-	fanUrlSuffix = "/operational/system/fanStatus/"
+	fanUrlSuffix = "/restconf/data/sonusSystem:system/fanStatus"
 )
 
 var FanMetric = lib.SonusMetric{
@@ -30,13 +30,13 @@ func getFanUrl(ctx lib.MetricContext) string {
 
 var fanMetrics = map[string]*prometheus.Desc{
 	"Fan_Speed": prometheus.NewDesc(
-		prometheus.BuildFQName("sonus", "fan", "speed"),
+		prometheus.BuildFQName("ribbon", "fan", "speed"),
 		"Current speed of fans, in RPM",
 		[]string{"server", "fanID"}, nil,
 	),
 }
 
-func processFans(ctx lib.MetricContext, xmlBody *[]byte) {
+func processFans(ctx lib.MetricContext, xmlBody *[]byte,system []string) {
 	var (
 		errors []*error
 		fans   = new(fanCollection)
@@ -58,7 +58,7 @@ func processFans(ctx lib.MetricContext, xmlBody *[]byte) {
 			errors = append(errors, &err)
 			break
 		}
-		ctx.MetricChannel <- prometheus.MustNewConstMetric(fanMetrics["Fan_Speed"], prometheus.GaugeValue, fanRpm, fan.ServerName, fan.FanID)
+		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(fanMetrics["Fan_Speed"], prometheus.GaugeValue, fanRpm, fan.ServerName, fan.FanID))
 	}
 
 	log.Info("Fan Metrics collected")

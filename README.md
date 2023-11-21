@@ -1,17 +1,16 @@
-# Prometheus Sonus Exporter
+# Prometheus Ribbon Exporter
 
-Exposes basic metrics for your Sonus SBC from the API, to a Prometheus
-compatible endpoint.  Based on the
-[Github Exporter](https://github.com/infinityworks/github-exporter) code.
+Exposes metrics for your Ribbon SBC from the RESTCONF API, to a Prometheus
+compatible endpoint.  Based on the [sonus-metrics-exporter](https://github.com/teliax/sonus-metrics-exporter) code.
 
 ## Configuration
 
 This exporter is setup to take input from environment variables:
 
 ### Required
-* `API_URLS` Space-separated list of URLs for the Sonus API to be tried in order.  Should appear as `https://{ip1}/api https://{ip2}/api`
-* `API_USER` The username to use when logging in to the Sonus API.
-* `API_PASSWORD` The password to use when authenticating to the Sonus.
+* `API_URLS` Space-separated list of URLs for the Ribbon RESTCONF API to be tried in order.  Should appear as `https://{ip1}/api https://{ip2}/restconf/data/`
+* `API_USER` The username to use when logging in to the Ribbon RESTCONF API.
+* `API_PASSWORD` The password to use when authenticating to the Ribbon RESTCONF.
 
 ### Optional
 * `API_ADDRESSCONTEXTS` Space-separated list of addressContexts to iterate over, defaults to `default`
@@ -23,10 +22,6 @@ This exporter is setup to take input from environment variables:
 
 ## Install and deploy
 
-Run manually from Docker Hub:
-```
-docker run -d --restart=always -p 9172:9172 -e API_USER="username" -e API_PASSWORD="password" teliax/sonus-metrics-exporter
-```
 
 Build a docker image:
 ```
@@ -37,14 +32,14 @@ docker run -d --restart=always -p 9172:9172  -e API_USER="username" -e API_PASSW
 ## Docker compose
 
 ```
-sonus-metrics-exporter:
+ribbon-metrics-exporter:
     tty: true
     stdin_open: true
     expose:
       - 9172
     ports:
       - 9172:9172
-    image: teliax/sonus-metrics-exporter:latest
+    image: <image-name>:latest
     environment:
       - API_USER=username
       - API_PASSWORD=password

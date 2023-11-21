@@ -3,10 +3,10 @@ package main
 import (
 	"net/http"
 
-	"sonus-metrics-exporter/config"
-	"sonus-metrics-exporter/exporter"
-	"sonus-metrics-exporter/lib"
-	"sonus-metrics-exporter/metrics"
+	"core-exporter/config"
+	"core-exporter/exporter"
+	"core-exporter/lib"
+	"core-exporter/metrics"
 
 	"github.com/fatih/structs"
 	"github.com/infinityworks/go-common/logger"
@@ -22,11 +22,21 @@ var (
 	metricList = []lib.SonusMetric{
 		metrics.DSPMetric,
 		metrics.FanMetric,
+		metrics.DiskStatusMetric,
+		metrics.DiskUsageMetric,
+	        metrics.MemoryMetric,
+		metrics.CpuMetric,
 		metrics.IPInterfaceMetric,
 		metrics.PowerSupplyMetric,
 		metrics.SipStatisticMetric,
 		metrics.SipArsMetric,
 		metrics.TGMetric,
+		metrics.MgmtPortMetric,
+		metrics.PacketPortMetric,
+		metrics.SoftwareUpgradeMetric,
+		metrics.CallCountMetric,
+		metrics.SyncStatusMetric,
+		metrics.IpPolicingMetric,
 	}
 )
 
@@ -52,10 +62,10 @@ func main() {
 	http.Handle(applicationCfg.MetricsPath(), promhttp.Handler())
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`<html>
-		                <head><title>Sonus Exporter</title></head>
+		                <head><title>Ribbon SBC Exporter</title></head>
 		                <body>
-		                   <h1>Sonus Metrics Exporter</h1>
-						   <p>For more information, visit <a href=https://github.com/teliax/sonus-metrics-exporter>GitHub</a></p>
+		                   <h1>Ribbon Metrics Exporter</h1>
+						   <p>For more information, visit <a href=ssss>GitHub</a></p>
 		                   <p><a href='` + applicationCfg.MetricsPath() + `'>Metrics</a></p>
 		                   </body>
 		                </html>

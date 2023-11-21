@@ -3,7 +3,7 @@ package metrics
 import (
 	"encoding/xml"
 	"fmt"
-	"sonus-metrics-exporter/lib"
+	"core-exporter/lib"
 
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
@@ -11,7 +11,7 @@ import (
 
 const (
 	sipArsName      = "SIP ARS"
-	sipArsURLFormat = "%s/operational/addressContext/%s/zone/%s/sipArsStatus/"
+	sipArsURLFormat = "%s/restconf/data/sonusAddressContext:addressContext=%s/sonusZone:zone=%s/sonusSipTrunkGroup:sipArsStatus"
 )
 
 var SipArsMetric = lib.SonusMetric{
@@ -28,13 +28,13 @@ func getSipArsUrl(ctx lib.MetricContext) string {
 
 var sipArsMetrics = map[string]*prometheus.Desc{
 	"SIPARS_Endpoint_State": prometheus.NewDesc(
-		prometheus.BuildFQName("sonus", "sipars", "endpoint_status"),
+		prometheus.BuildFQName("ribbon", "sipars", "endpoint_status"),
 		"State of a sipArs monitored endpoint",
 		[]string{"zone", "endpoint_address", "endpoint_port", "state_name"}, nil,
 	),
 }
 
-func processSipArs(ctx lib.MetricContext, xmlBody *[]byte) {
+func processSipArs(ctx lib.MetricContext, xmlBody *[]byte,system []string) {
 	var (
 		errors []*error
 		sipArs = new(sipArsCollection)
@@ -63,7 +63,7 @@ func processSipArs(ctx lib.MetricContext, xmlBody *[]byte) {
 			endpoint = status.EndpointIpAddress
 		}
 
-		ctx.MetricChannel <- prometheus.MustNewConstMetric(sipArsMetrics["SIPARS_Endpoint_State"], prometheus.GaugeValue, status.stateToFloat(), ctx.Zone, endpoint, status.EndpointIpPortNum, status.EndpointArsState)
+		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(sipArsMetrics["SIPARS_Endpoint_State"], prometheus.GaugeValue, status.stateToFloat(), ctx.Zone, endpoint, status.EndpointIpPortNum, status.EndpointArsState))
 	}
 
 	log.Infof("SIP ARS Metrics for Address Context %q, zone %q collected", ctx.AddressContext, ctx.Zone)

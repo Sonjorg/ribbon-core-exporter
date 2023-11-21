@@ -24,6 +24,10 @@ func doHTTPRequest(client *http.Client, url string, user string, pass string) (*
 		return nil, err
 	}
 
+	req.Header = http.Header{
+		"Accept": {"application/vnd.yang.collection+xml"},
+	}
+
 	req.SetBasicAuth(user, pass)
 
 	resp, err := client.Do(req)
@@ -33,7 +37,7 @@ func doHTTPRequest(client *http.Client, url string, user string, pass string) (*
 	}
 
 	if resp.StatusCode == 404 {
-		return nil, fmt.Errorf("Received 404 status from Sonus API, ensure the URL is correct. ")
+		return nil, fmt.Errorf("Received 404 status from Ribbon Restconf API, ensure the URL is correct. ")
 	}
 
 	// Read the body to a byte array so it can be used elsewhere

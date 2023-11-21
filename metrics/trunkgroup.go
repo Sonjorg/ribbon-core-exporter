@@ -3,7 +3,7 @@ package metrics
 import (
 	"encoding/xml"
 
-	"sonus-metrics-exporter/lib"
+	"core-exporter/lib"
 
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
@@ -11,8 +11,8 @@ import (
 
 const (
 	trunkGroupName      = "TrunkGroup"
-	trunkGroupUrlSuffix = "/operational/global/globalTrunkGroupStatus/"
-)
+	trunkGroupUrlSuffix = "/restconf/data/sonusGlobal:global/sonusGlobalTrunkGroup:globalTrunkGroupStatus"
+)  
 
 var TGMetric = lib.SonusMetric{
 	Name:       trunkGroupName,
@@ -28,33 +28,33 @@ func getTGUrl(ctx lib.MetricContext) string {
 
 var tgMetrics = map[string]*prometheus.Desc{
 	"TG_Bandwidth": prometheus.NewDesc(
-		prometheus.BuildFQName("sonus", "TG", "bytes"),
+		prometheus.BuildFQName("ribbon", "TG", "bytes"),
 		"Bandwidth in use by current calls",
 		[]string{"zone", "name", "direction"}, nil,
 	),
 	"TG_OBState": prometheus.NewDesc(
-		prometheus.BuildFQName("sonus", "TG", "outbound_state"),
+		prometheus.BuildFQName("ribbon", "TG", "outbound_state"),
 		"State of outbound calls on the trunkgroup",
 		[]string{"zone", "name"}, nil,
 	),
 	"TG_State": prometheus.NewDesc(
-		prometheus.BuildFQName("sonus", "TG", "state"),
+		prometheus.BuildFQName("ribbon", "TG", "state"),
 		"State of the trunkgroup",
 		[]string{"zone", "name"}, nil,
 	),
 	"TG_TotalChans": prometheus.NewDesc(
-		prometheus.BuildFQName("sonus", "TG", "total_channels"),
+		prometheus.BuildFQName("ribbon", "TG", "channels"),
 		"Number of configured channels",
 		[]string{"zone", "name"}, nil,
 	),
 	"TG_Usage": prometheus.NewDesc(
-		prometheus.BuildFQName("sonus", "TG", "usage_total"),
+		prometheus.BuildFQName("ribbon", "TG", "activeCalls"),
 		"Number of active calls",
 		[]string{"zone", "name", "direction"}, nil,
 	),
 }
 
-func processTGs(ctx lib.MetricContext, xmlBody *[]byte) {
+func processTGs(ctx lib.MetricContext, xmlBody *[]byte,system []string) {
 	var (
 		errors []*error
 		tgs    = new(trunkGroupCollection)
@@ -70,13 +70,13 @@ func processTGs(ctx lib.MetricContext, xmlBody *[]byte) {
 	}
 
 	for _, tg := range tgs.TrunkGroupStatus {
-		ctx.MetricChannel <- prometheus.MustNewConstMetric(tgMetrics["TG_Usage"], prometheus.GaugeValue, tg.InboundCallsUsage, tg.Zone, tg.Name, "inbound")
-		ctx.MetricChannel <- prometheus.MustNewConstMetric(tgMetrics["TG_Usage"], prometheus.GaugeValue, tg.OutboundCallsUsage, tg.Zone, tg.Name, "outbound")
-		ctx.MetricChannel <- prometheus.MustNewConstMetric(tgMetrics["TG_Bandwidth"], prometheus.GaugeValue, tg.BandwidthInboundUsage, tg.Zone, tg.Name, "inbound")
-		ctx.MetricChannel <- prometheus.MustNewConstMetric(tgMetrics["TG_Bandwidth"], prometheus.GaugeValue, tg.BandwidthOutboundUsage, tg.Zone, tg.Name, "outbound")
-		ctx.MetricChannel <- prometheus.MustNewConstMetric(tgMetrics["TG_TotalChans"], prometheus.GaugeValue, tg.TotalCallsConfigured, tg.Zone, tg.Name)
-		ctx.MetricChannel <- prometheus.MustNewConstMetric(tgMetrics["TG_State"], prometheus.GaugeValue, trunkGroupStatus.stateToMetric(*tg), tg.Zone, tg.Name)
-		ctx.MetricChannel <- prometheus.MustNewConstMetric(tgMetrics["TG_OBState"], prometheus.GaugeValue, trunkGroupStatus.outStateToMetric(*tg), tg.Zone, tg.Name)
+		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(tgMetrics["TG_Usage"], prometheus.GaugeValue, tg.InboundCallsUsage, tg.Zone, tg.Name, "inbound"))
+		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(tgMetrics["TG_Usage"], prometheus.GaugeValue, tg.OutboundCallsUsage, tg.Zone, tg.Name, "outbound"))
+		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(tgMetrics["TG_Bandwidth"], prometheus.GaugeValue, tg.BandwidthInboundUsage, tg.Zone, tg.Name, "inbound"))
+		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(tgMetrics["TG_Bandwidth"], prometheus.GaugeValue, tg.BandwidthOutboundUsage, tg.Zone, tg.Name, "outbound"))
+		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(tgMetrics["TG_TotalChans"], prometheus.GaugeValue, tg.TotalCallsConfigured, tg.Zone, tg.Name))
+		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(tgMetrics["TG_State"], prometheus.GaugeValue, trunkGroupStatus.stateToMetric(*tg), tg.Zone, tg.Name))
+		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(tgMetrics["TG_OBState"], prometheus.GaugeValue, trunkGroupStatus.outStateToMetric(*tg), tg.Zone, tg.Name))
 	}
 
 	log.Info("Trunk Group Metrics collected")

@@ -1,7 +1,7 @@
 version: "2"
 
 services:
-  sonus-metrics-exporter:
+  ribbon-metrics-exporter:
     tty: true
     stdin_open: true
     expose:

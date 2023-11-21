@@ -7,50 +7,55 @@ import (
 	"strconv"
 	"time"
 
-	"sonus-metrics-exporter/lib"
+	"core-exporter/lib"
 
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
 )
 
 func getServerStatusURL(apiBase string) string {
-	return fmt.Sprintf("%s/operational/system/serverStatus/", apiBase)
+	return fmt.Sprintf("%s/restconf/data/sonusSystem:system/serverStatus", apiBase)
 }
 
 func (a *addressContext) getZoneStatusURL(ctx lib.MetricContext) string {
-	return fmt.Sprintf("%s/operational/addressContext/%s/zoneStatus/", ctx.APIBase, a.Name)
+	return fmt.Sprintf("%s/restconf/data/sonusAddressContext:addressContext=%s/sonusZone:zoneStatus", ctx.APIBase, a.Name)
+
 }
 
 func (a *addressContext) getIPInterfaceGroupURL(ctx lib.MetricContext) string {
-	return fmt.Sprintf("%s/operational/addressContext/%s/ipInterfaceGroup/", ctx.APIBase, a.Name)
+	return fmt.Sprintf("%s/restconf/data/sonusAddressContext:addressContext=%s/sonusIpInterface:ipInterfaceGroup", ctx.APIBase, a.Name)
 }
-
 var serverStatusMetrics = map[string]*prometheus.Desc{
 	"System_Redundancy_Role": prometheus.NewDesc(
-		prometheus.BuildFQName("sonus", "system", "redundancy_role"),
+		prometheus.BuildFQName("ribbon", "system", "redundancy_role"),
 		"Current role of server. 1 = active",
 		[]string{"server", "role_name"}, nil,
 	),
 	"System_Sync_Status": prometheus.NewDesc(
-		prometheus.BuildFQName("sonus", "system", "sync_status"),
+		prometheus.BuildFQName("ribbon", "system", "sync_status"),
 		"Current synchronization status. 1 = syncCompleted",
 		[]string{"server", "status_name"}, nil,
 	),
 	"System_Uptime": prometheus.NewDesc(
-		prometheus.BuildFQName("sonus", "system", "uptime"),
+		prometheus.BuildFQName("ribbon", "system", "uptime"),
 		"Current uptime of server, in seconds",
 		[]string{"server", "type"}, nil,
+	),
+	"System_Status": prometheus.NewDesc(
+		prometheus.BuildFQName("ribbon", "system", "status"),
+		"Current status of server",
+		[]string{"server", "restart", "platform", "serial"}, nil,
 	),
 }
 
 var zoneStatusMetrics = map[string]*prometheus.Desc{
 	"Zone_Total_Calls_Configured": prometheus.NewDesc(
-		prometheus.BuildFQName("sonus", "zone", "total_calls_configured"),
+		prometheus.BuildFQName("ribbon", "zone", "total_calls_configured"),
 		"Total call limit per zone",
 		[]string{"addresscontext", "zone"}, nil,
 	),
 	"Zone_Usage_Total": prometheus.NewDesc(
-		prometheus.BuildFQName("sonus", "zone", "usage_total"),
+		prometheus.BuildFQName("ribbon", "zone", "usage_total"),
 		"Total call limit per zone",
 		[]string{"direction", "addresscontext", "zone"}, nil,
 	),
@@ -61,6 +66,33 @@ type (
 		ServerStatus []*serverStatus `xml:"http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0 serverStatus"`
 	}
 
+
+/*
+
+<serverStatus xmlns="http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0"  xmlns:SYS="http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0">
+    <name>NOGJHDO-SBC-01ta</name>
+    <hwType>SBC 5400</hwType>
+    <serialNum>2214220019</serialNum>
+    <partNum>821-00504</partNum>
+    <platformVersion>V11.01.00R001</platformVersion>
+    <applicationVersion>V11.01.00R001</applicationVersion>
+    <mgmtRedundancyRole>active</mgmtRedundancyRole>
+    <upTime>99 Days 03:49:54</upTime>
+    <applicationUpTime>99 Days 03:44:55</applicationUpTime>
+    <lastRestartReason>systemRestart</lastRestartReason>
+    <syncStatus>syncCompleted</syncStatus>
+    <daughterBoardPresent>false</daughterBoardPresent>
+    <currentTime>2023/11/03 15:17:29 </currentTime>
+    <pktPortSpeed>speed1Gbps</pktPortSpeed>
+    <actualCeName>NOGJHDO-SBC-01ta</actualCeName>
+    <hwSubType>5400</hwSubType>
+    <fingerprint></fingerprint>
+  </serverStatus>
+
+*/
+
+
+
 	serverStatus struct {
 		Name                     string `xml:"http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0 name"`
 		SerialNum                string `xml:"http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0 serialNum"`
@@ -68,6 +100,8 @@ type (
 		Uptime                   string `xml:"http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0 upTime"`
 		ApplicationUptime        string `xml:"http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0 applicationUpTime"`
 		SyncStatus               string `xml:"http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0 syncStatus"`
+		LastRestartReason        string `xml:"http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0 lastRestartReason"`
+		PlatformVersion          string `xml:"http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0 platformVersion"`		
 	}
 
 	serverUptimeType uint8
@@ -167,7 +201,8 @@ func processServerStatus(xmlBody *[]byte, ch chan<- prometheus.Metric) error {
 		ch <- prometheus.MustNewConstMetric(serverStatusMetrics["System_Sync_Status"], prometheus.GaugeValue, server.syncStatusToFloat(), server.Name, server.SyncStatus)
 		ch <- prometheus.MustNewConstMetric(serverStatusMetrics["System_Uptime"], prometheus.CounterValue, server.parseUptime(serverOSUptime), server.Name, "os")
 		ch <- prometheus.MustNewConstMetric(serverStatusMetrics["System_Uptime"], prometheus.CounterValue, server.parseUptime(serverAppUptime), server.Name, "application")
-	}
+		ch <- prometheus.MustNewConstMetric(serverStatusMetrics["System_Status"], prometheus.GaugeValue, 1, server.Name, server.LastRestartReason, server.PlatformVersion, server.SerialNum)
+	}  // 
 	log.Info("Server Status and Metrics collected")
 	return nil
 }
@@ -194,5 +229,6 @@ func processIPInterfaceGroups(addressContext *addressContext, xmlBody *[]byte) e
 		log.Errorf("Failed to deserialize ipInterfaceGroup XML: %v", err)
 		return err
 	}
+	fmt.Println("Interface groups: ",addressContext.IPInterfaceGroups)
 	return nil
 }

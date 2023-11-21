@@ -1,5 +1,5 @@
 FROM golang:1.19-alpine as build
-LABEL maintainer "Teliax"
+LABEL maintainer "HDO"
 
 RUN apk --no-cache add ca-certificates \
      && apk --no-cache add --virtual build-deps git gcc musl-dev

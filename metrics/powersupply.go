@@ -3,7 +3,7 @@ package metrics
 import (
 	"encoding/xml"
 
-	"sonus-metrics-exporter/lib"
+	"core-exporter/lib"
 
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
@@ -11,7 +11,7 @@ import (
 
 const (
 	powerSupplyName      = "PowerSupply"
-	powerSupplyUrlSuffix = "/operational/system/powerSupplyStatus/"
+	powerSupplyUrlSuffix = "/restconf/data/sonusSystem:system/powerSupplyStatus"
 )
 
 var PowerSupplyMetric = lib.SonusMetric{
@@ -28,18 +28,18 @@ func getPowerSupplyUrl(ctx lib.MetricContext) string {
 
 var powerSupplyMetrics = map[string]*prometheus.Desc{
 	"PowerSupply_Power_Fault": prometheus.NewDesc(
-		prometheus.BuildFQName("sonus", "powersupply", "powerfault"),
+		prometheus.BuildFQName("ribbon", "powersupply", "powerfault"),
 		"Is there a power fault, per supply",
 		[]string{"server", "powerSupplyID"}, nil,
 	),
 	"PowerSupply_Voltage_Fault": prometheus.NewDesc(
-		prometheus.BuildFQName("sonus", "powersupply", "voltagefault"),
+		prometheus.BuildFQName("ribbon", "powersupply", "voltagefault"),
 		"Is there a voltage fault, per supply",
 		[]string{"server", "powerSupplyID"}, nil,
 	),
 }
 
-func processPowerSupplies(ctx lib.MetricContext, xmlBody *[]byte) {
+func processPowerSupplies(ctx lib.MetricContext, xmlBody *[]byte,system []string) {
 	var (
 		errors        []*error
 		powerSupplies = new(powerSupplyCollection)
@@ -55,8 +55,8 @@ func processPowerSupplies(ctx lib.MetricContext, xmlBody *[]byte) {
 	}
 
 	for _, psu := range powerSupplies.PowerSupplyStatus {
-		ctx.MetricChannel <- prometheus.MustNewConstMetric(powerSupplyMetrics["PowerSupply_Power_Fault"], prometheus.GaugeValue, psu.powerFaultToMetric(), psu.ServerName, psu.PowerSupplyID)
-		ctx.MetricChannel <- prometheus.MustNewConstMetric(powerSupplyMetrics["PowerSupply_Voltage_Fault"], prometheus.GaugeValue, psu.voltageFaultToMetric(), psu.ServerName, psu.PowerSupplyID)
+		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(powerSupplyMetrics["PowerSupply_Power_Fault"], prometheus.GaugeValue, psu.powerFaultToMetric(), psu.ServerName, psu.PowerSupplyID))
+		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(powerSupplyMetrics["PowerSupply_Voltage_Fault"], prometheus.GaugeValue, psu.voltageFaultToMetric(), psu.ServerName, psu.PowerSupplyID))
 	}
 
 	log.Info("Power Supply Metrics collected")

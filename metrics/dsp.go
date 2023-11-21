@@ -3,7 +3,7 @@ package metrics
 import (
 	"encoding/xml"
 
-	"sonus-metrics-exporter/lib"
+	"core-exporter/lib"
 
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
@@ -11,8 +11,8 @@ import (
 
 const (
 	dspName      = "DSP"
-	dspUrlSuffix = "/operational/system/dspStatus/dspUsage/"
-)
+	dspUrlSuffix = "/restconf/data/sonusSystem:system/sonusDrmDspStatus:dspStatus/dspUsage"
+)  // /restconf/data/sonusSystem:system/sonusDrmDspStatus:dspStatus/dspUsage
 
 var DSPMetric = lib.SonusMetric{
 	Name:       dspName,
@@ -20,6 +20,8 @@ var DSPMetric = lib.SonusMetric{
 	URLGetter:  getDSPUrl,
 	APIMetrics: dspMetrics,
 	Repetition: lib.RepeatNone,
+	MetricArray: MetricArray,
+
 }
 
 func getDSPUrl(ctx lib.MetricContext) string {
@@ -28,28 +30,28 @@ func getDSPUrl(ctx lib.MetricContext) string {
 
 var dspMetrics = map[string]*prometheus.Desc{
 	"DSP_Resources_Used": prometheus.NewDesc(
-		prometheus.BuildFQName("sonus", "dsp", "resources_used"),
+		prometheus.BuildFQName("ribbon", "dsp", "resources_used"),
 		"Usage of DSP resources per slot",
 		[]string{"system", "slot"}, nil,
 	),
 	"DSP_Resources_Total": prometheus.NewDesc(
-		prometheus.BuildFQName("sonus", "dsp", "resources_total"),
+		prometheus.BuildFQName("ribbon", "dsp", "resources_total"),
 		"Total compression resources",
 		[]string{"system"}, nil,
 	),
 	"DSP_Compression_Utilization": prometheus.NewDesc(
-		prometheus.BuildFQName("sonus", "dsp", "compression_utilization"),
+		prometheus.BuildFQName("ribbon", "dsp", "compression_utilization"),
 		"Compression resource utilization, in percent",
 		[]string{"system"}, nil,
 	),
 	"DSP_Codec_Utilization": prometheus.NewDesc(
-		prometheus.BuildFQName("sonus", "dsp", "codec_utilization"),
+		prometheus.BuildFQName("ribbon", "dsp", "codec_utilization"),
 		"Codec utilization, in percent",
 		[]string{"system", "codec"}, nil,
 	),
 }
 
-func processDSPUsage(ctx lib.MetricContext, xmlBody *[]byte) {
+func processDSPUsage(ctx lib.MetricContext, xmlBody *[]byte,system []string) {
 	var (
 		errors []*error
 		dsp    = new(dspUsageCollection)
@@ -66,42 +68,37 @@ func processDSPUsage(ctx lib.MetricContext, xmlBody *[]byte) {
 
 	var d = dsp.DSPUsage
 
-	ctx.MetricChannel <- prometheus.MustNewConstMetric(dspMetrics["DSP_Resources_Used"], prometheus.GaugeValue, d.Slot1ResourcesUtilized, d.SystemName, "1")
-	ctx.MetricChannel <- prometheus.MustNewConstMetric(dspMetrics["DSP_Resources_Used"], prometheus.GaugeValue, d.Slot2ResourcesUtilized, d.SystemName, "2")
-	ctx.MetricChannel <- prometheus.MustNewConstMetric(dspMetrics["DSP_Resources_Used"], prometheus.GaugeValue, d.Slot3ResourcesUtilized, d.SystemName, "3")
-	ctx.MetricChannel <- prometheus.MustNewConstMetric(dspMetrics["DSP_Resources_Used"], prometheus.GaugeValue, d.Slot4ResourcesUtilized, d.SystemName, "4")
+	ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(dspMetrics["DSP_Resources_Used"], prometheus.GaugeValue, d.Slot1ResourcesUtilized, d.SystemName, "1"))
+	ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(dspMetrics["DSP_Resources_Used"], prometheus.GaugeValue, d.Slot2ResourcesUtilized, d.SystemName, "2"))
+	ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(dspMetrics["DSP_Resources_Used"], prometheus.GaugeValue, d.Slot3ResourcesUtilized, d.SystemName, "3"))
+	ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(dspMetrics["DSP_Resources_Used"], prometheus.GaugeValue, d.Slot4ResourcesUtilized, d.SystemName, "4"))
 
-	ctx.MetricChannel <- prometheus.MustNewConstMetric(dspMetrics["DSP_Resources_Total"], prometheus.GaugeValue, d.CompressionTotal, d.SystemName)
+	ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(dspMetrics["DSP_Resources_Total"], prometheus.GaugeValue, d.CompressionTotal, d.SystemName))
 
-	ctx.MetricChannel <- prometheus.MustNewConstMetric(dspMetrics["DSP_Compression_Utilization"], prometheus.GaugeValue, d.CompressionUtilization, d.SystemName)
+	ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(dspMetrics["DSP_Compression_Utilization"], prometheus.GaugeValue, d.CompressionUtilization, d.SystemName))
 
-	var codecUtilization = map[string]float64{
-		"G.711":                        d.G711Utilization,
-		"G.711 Silence Suppression":    d.G711SsUtilization,
-		"G.726":                        d.G726Utilization,
-		"G.723.1":                      d.G7231Utilization,
-		"G.722":                        d.G722Utilization,
-		"G.722.1":                      d.G7221Utilization,
-		"G.729":                        d.G729AbUtilization,
-		"ECM":                          d.EcmUtilization,
-		"iLBC":                         d.IlbcUtilization,
-		"AMR-NB":                       d.AmrNbUtilization,
-		"AMR-WB":                       d.AmrWbUtilization,
-		"Tone":                         d.ToneUtilization,
-		"G.711 V8":                     d.G711V8Utilization,
-		"G.711 Silence Suppression V8": d.G711SsV8Utilization,
-		"G.726 V8":                     d.G726V8Utilization,
-		"G.723.1 V8":                   d.G7231V8Utilization,
-		"G.722 V8":                     d.G722V8Utilization,
-		"G.722.1 V8":                   d.G7221V8Utilization,
-		"G.729 V8":                     d.G729AbV8Utilization,
-		"ECM V.34":                     d.EcmV34Utilization,
-		"iLBC V8":                      d.IlbcV8Utilization,
-		"Opus":                         d.OpusUtilization,
-	}
-	for n, v := range codecUtilization {
-		ctx.MetricChannel <- prometheus.MustNewConstMetric(dspMetrics["DSP_Codec_Utilization"], prometheus.GaugeValue, v, d.SystemName, n)
-	}
+	ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(dspMetrics["DSP_Codec_Utilization"], prometheus.GaugeValue, d.G711Utilization, d.SystemName, "G.711"))
+	ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(dspMetrics["DSP_Codec_Utilization"], prometheus.GaugeValue, d.G711SsUtilization, d.SystemName, "G.711 Silence Suppression"))
+	ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(dspMetrics["DSP_Codec_Utilization"], prometheus.GaugeValue, d.G726Utilization, d.SystemName, "G.726"))
+	ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(dspMetrics["DSP_Codec_Utilization"], prometheus.GaugeValue, d.G7231Utilization, d.SystemName, "G.723.1"))
+	ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(dspMetrics["DSP_Codec_Utilization"], prometheus.GaugeValue, d.G722Utilization, d.SystemName, "G.722"))
+	ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(dspMetrics["DSP_Codec_Utilization"], prometheus.GaugeValue, d.G7221Utilization, d.SystemName, "G.722.1"))
+	ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(dspMetrics["DSP_Codec_Utilization"], prometheus.GaugeValue, d.G729AbUtilization, d.SystemName, "G.729"))
+	ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(dspMetrics["DSP_Codec_Utilization"], prometheus.GaugeValue, d.EcmUtilization, d.SystemName, "ECM"))
+	ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(dspMetrics["DSP_Codec_Utilization"], prometheus.GaugeValue, d.IlbcUtilization, d.SystemName, "iLBC"))
+	ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(dspMetrics["DSP_Codec_Utilization"], prometheus.GaugeValue, d.AmrNbUtilization, d.SystemName, "AMR-NB"))
+	ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(dspMetrics["DSP_Codec_Utilization"], prometheus.GaugeValue, d.AmrWbUtilization, d.SystemName, "AMR-WB"))
+	ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(dspMetrics["DSP_Codec_Utilization"], prometheus.GaugeValue, d.ToneUtilization, d.SystemName, "Tone"))
+	ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(dspMetrics["DSP_Codec_Utilization"], prometheus.GaugeValue, d.G711V8Utilization, d.SystemName, "G.711 V8"))
+	ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(dspMetrics["DSP_Codec_Utilization"], prometheus.GaugeValue, d.G711SsV8Utilization, d.SystemName, "G.711 Silence Suppression V8"))
+	ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(dspMetrics["DSP_Codec_Utilization"], prometheus.GaugeValue, d.G726V8Utilization, d.SystemName, "G.726 V8"))
+	ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(dspMetrics["DSP_Codec_Utilization"], prometheus.GaugeValue, d.G7231V8Utilization, d.SystemName, "G.723.1 V8"))
+	ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(dspMetrics["DSP_Codec_Utilization"], prometheus.GaugeValue, d.G722V8Utilization, d.SystemName, "G.722 V8"))
+	ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(dspMetrics["DSP_Codec_Utilization"], prometheus.GaugeValue, d.G7221V8Utilization, d.SystemName, "G.722.1 V8"))
+	ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(dspMetrics["DSP_Codec_Utilization"], prometheus.GaugeValue, d.G729AbV8Utilization, d.SystemName, "G.729 V8"))
+	ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(dspMetrics["DSP_Codec_Utilization"], prometheus.GaugeValue, d.EcmV34Utilization, d.SystemName, "ECM V.34"))
+	ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(dspMetrics["DSP_Codec_Utilization"], prometheus.GaugeValue, d.IlbcV8Utilization, d.SystemName, "iLBC V8"))
+	ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(dspMetrics["DSP_Codec_Utilization"], prometheus.GaugeValue, d.OpusUtilization, d.SystemName, "Opus"))
 
 	log.Info("DSP Metrics collected")
 	ctx.ResultChannel <- lib.MetricResult{Name: dspName, Success: true}
