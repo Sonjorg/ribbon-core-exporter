@@ -107,17 +107,17 @@ if len(callCounts.CallCountStatuses)==0{
 
 	for _, name := range system {
 		for _, callCount := range callCounts.CallCountStatuses {
-			ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(CallCountMetrics["callAttempts"], prometheus.GaugeValue, callCount.CallAttempts, callCount.Key, name))
-			ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(CallCountMetrics["callCompletions"], prometheus.GaugeValue, callCount.CallCompletions, callCount.Key, name))
-			ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(CallCountMetrics["activeCalls"], prometheus.GaugeValue, callCount.ActiveCalls, callCount.Key, name))
-			ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(CallCountMetrics["stableCalls"], prometheus.GaugeValue, callCount.StableCalls, callCount.Key, name))
-			ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(CallCountMetrics["callUpdates"], prometheus.GaugeValue, callCount.CallUpdates, callCount.Key, name))
-			ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(CallCountMetrics["activeCallsNonUser"], prometheus.GaugeValue, callCount.ActiveCallsNonUser, callCount.Key, name))
-			ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(CallCountMetrics["stableCallsNonUser"], prometheus.GaugeValue, callCount.StableCallsNonUser, callCount.Key, name))
-			ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(CallCountMetrics["totalCalls"], prometheus.GaugeValue, callCount.TotalCalls, callCount.Key, name))
-			ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(CallCountMetrics["totalCallsNonUser"], prometheus.GaugeValue, callCount.TotalCallsNonUser, callCount.Key, name))
-			ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(CallCountMetrics["totalCallsEmergEstablishing"], prometheus.GaugeValue, callCount.TotalCallsEmergEstablishing, callCount.Key, name))
-			ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(CallCountMetrics["totalCallsEmergStable"], prometheus.GaugeValue, callCount.TotalCallsEmergStable, callCount.Key, name))
+			ctx.MetricChannel <- prometheus.MustNewConstMetric(CallCountMetrics["callAttempts"], prometheus.GaugeValue, callCount.CallAttempts, callCount.Key, name)
+			ctx.MetricChannel <- prometheus.MustNewConstMetric(CallCountMetrics["callCompletions"], prometheus.GaugeValue, callCount.CallCompletions, callCount.Key, name)
+			ctx.MetricChannel <- prometheus.MustNewConstMetric(CallCountMetrics["activeCalls"], prometheus.GaugeValue, callCount.ActiveCalls, callCount.Key, name)
+			ctx.MetricChannel <- prometheus.MustNewConstMetric(CallCountMetrics["stableCalls"], prometheus.GaugeValue, callCount.StableCalls, callCount.Key, name)
+			ctx.MetricChannel <- prometheus.MustNewConstMetric(CallCountMetrics["callUpdates"], prometheus.GaugeValue, callCount.CallUpdates, callCount.Key, name)
+			ctx.MetricChannel <- prometheus.MustNewConstMetric(CallCountMetrics["activeCallsNonUser"], prometheus.GaugeValue, callCount.ActiveCallsNonUser, callCount.Key, name)
+			ctx.MetricChannel <- prometheus.MustNewConstMetric(CallCountMetrics["stableCallsNonUser"], prometheus.GaugeValue, callCount.StableCallsNonUser, callCount.Key, name)
+			ctx.MetricChannel <- prometheus.MustNewConstMetric(CallCountMetrics["totalCalls"], prometheus.GaugeValue, callCount.TotalCalls, callCount.Key, name)
+			ctx.MetricChannel <- prometheus.MustNewConstMetric(CallCountMetrics["totalCallsNonUser"], prometheus.GaugeValue, callCount.TotalCallsNonUser, callCount.Key, name)
+			ctx.MetricChannel <- prometheus.MustNewConstMetric(CallCountMetrics["totalCallsEmergEstablishing"], prometheus.GaugeValue, callCount.TotalCallsEmergEstablishing, callCount.Key, name)
+			ctx.MetricChannel <- prometheus.MustNewConstMetric(CallCountMetrics["totalCallsEmergStable"], prometheus.GaugeValue, callCount.TotalCallsEmergStable, callCount.Key, name)
 		}
 	}
 

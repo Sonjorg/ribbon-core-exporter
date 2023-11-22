@@ -70,13 +70,13 @@ func processTGs(ctx lib.MetricContext, xmlBody *[]byte,system []string) {
 	}
 
 	for _, tg := range tgs.TrunkGroupStatus {
-		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(tgMetrics["TG_Usage"], prometheus.GaugeValue, tg.InboundCallsUsage, tg.Zone, tg.Name, "inbound"))
-		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(tgMetrics["TG_Usage"], prometheus.GaugeValue, tg.OutboundCallsUsage, tg.Zone, tg.Name, "outbound"))
-		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(tgMetrics["TG_Bandwidth"], prometheus.GaugeValue, tg.BandwidthInboundUsage, tg.Zone, tg.Name, "inbound"))
-		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(tgMetrics["TG_Bandwidth"], prometheus.GaugeValue, tg.BandwidthOutboundUsage, tg.Zone, tg.Name, "outbound"))
-		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(tgMetrics["TG_TotalChans"], prometheus.GaugeValue, tg.TotalCallsConfigured, tg.Zone, tg.Name))
-		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(tgMetrics["TG_State"], prometheus.GaugeValue, trunkGroupStatus.stateToMetric(*tg), tg.Zone, tg.Name))
-		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(tgMetrics["TG_OBState"], prometheus.GaugeValue, trunkGroupStatus.outStateToMetric(*tg), tg.Zone, tg.Name))
+		ctx.MetricChannel <- prometheus.MustNewConstMetric(tgMetrics["TG_Usage"], prometheus.GaugeValue, tg.InboundCallsUsage, tg.Zone, tg.Name, "inbound")
+		ctx.MetricChannel <- prometheus.MustNewConstMetric(tgMetrics["TG_Usage"], prometheus.GaugeValue, tg.OutboundCallsUsage, tg.Zone, tg.Name, "outbound")
+		ctx.MetricChannel <- prometheus.MustNewConstMetric(tgMetrics["TG_Bandwidth"], prometheus.GaugeValue, tg.BandwidthInboundUsage, tg.Zone, tg.Name, "inbound")
+		ctx.MetricChannel <- prometheus.MustNewConstMetric(tgMetrics["TG_Bandwidth"], prometheus.GaugeValue, tg.BandwidthOutboundUsage, tg.Zone, tg.Name, "outbound")
+		ctx.MetricChannel <- prometheus.MustNewConstMetric(tgMetrics["TG_TotalChans"], prometheus.GaugeValue, tg.TotalCallsConfigured, tg.Zone, tg.Name)
+		ctx.MetricChannel <- prometheus.MustNewConstMetric(tgMetrics["TG_State"], prometheus.GaugeValue, trunkGroupStatus.stateToMetric(*tg), tg.Zone, tg.Name)
+		ctx.MetricChannel <- prometheus.MustNewConstMetric(tgMetrics["TG_OBState"], prometheus.GaugeValue, trunkGroupStatus.outStateToMetric(*tg), tg.Zone, tg.Name)
 	}
 
 	log.Info("Trunk Group Metrics collected")

@@ -46,7 +46,6 @@ func init() {
 type Exporter struct {
 	Metrics []lib.SonusMetric
 	config.Config
-	//MetricArray []prometheus.Metric
 }
 
 // Describe - loops through the API metrics and passes them to prometheus.Describe
@@ -67,7 +66,8 @@ func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 
 // Collect function, called on by Prometheus Client library
 // This function is called when a scrape is performed on the /metrics page
-func (e *Exporter) Collect(ch chan<- prometheus.Metric) { 
+func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
+
 	var (
 		addressContexts           []*addressContext
 		apiBase                   string
@@ -149,7 +149,7 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 	// Perform HTTP requests one at a time then delegate xml deserialization and metric processing to a goroutine
 	go func() {
 		for _, metric := range e.Metrics {
-			ctx := lib.MetricContext{APIBase: apiBase, MetricArray: metric.MetricArray,  MetricChannel: ch, ResultChannel: results}
+			ctx := lib.MetricContext{APIBase: apiBase, MetricChannel: ch, ResultChannel: results}
 			if metric.Repetition == lib.RepeatNone {
 				collectCount++
 				doHTTPAndProcess(e, metric, ctx, httpClient,system)
@@ -196,12 +196,6 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 				httpTransport.CloseIdleConnections()
 				return
 			}
-		}
-	}
-	for _, metric := range e.Metrics {
-		for _, m := range metric.MetricArray {
-
-		  ch <- m
 		}
 	}
 

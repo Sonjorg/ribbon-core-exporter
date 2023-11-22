@@ -22,7 +22,6 @@ var DiskUsageMetric = lib.SonusMetric{
 	URLGetter:  getDiskUsageUrl,
 	APIMetrics: diskUsageMetrics,
 	Repetition: lib.RepeatNone,
-	MetricArray: MetricArray,
 }
 
 func getDiskUsageUrl(ctx lib.MetricContext) string {
@@ -73,8 +72,8 @@ func processDiskUsage(ctx lib.MetricContext, xmlBody *[]byte,system []string) {
 			break
 		}
 
-		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(diskUsageMetrics["free_DiskSpace"], prometheus.GaugeValue, freedisk, disk.ServerName, disk.Partition))
-		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(diskUsageMetrics["used_DiskSpace"], prometheus.GaugeValue, useddisk, disk.ServerName, disk.Partition))
+		ctx.MetricChannel <- prometheus.MustNewConstMetric(diskUsageMetrics["free_DiskSpace"], prometheus.GaugeValue, freedisk, disk.ServerName, disk.Partition)
+		ctx.MetricChannel <- prometheus.MustNewConstMetric(diskUsageMetrics["used_DiskSpace"], prometheus.GaugeValue, useddisk, disk.ServerName, disk.Partition)
 
 	}
 

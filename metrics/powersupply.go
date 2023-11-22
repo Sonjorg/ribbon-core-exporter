@@ -55,8 +55,8 @@ func processPowerSupplies(ctx lib.MetricContext, xmlBody *[]byte,system []string
 	}
 
 	for _, psu := range powerSupplies.PowerSupplyStatus {
-		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(powerSupplyMetrics["PowerSupply_Power_Fault"], prometheus.GaugeValue, psu.powerFaultToMetric(), psu.ServerName, psu.PowerSupplyID))
-		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(powerSupplyMetrics["PowerSupply_Voltage_Fault"], prometheus.GaugeValue, psu.voltageFaultToMetric(), psu.ServerName, psu.PowerSupplyID))
+		ctx.MetricChannel <- prometheus.MustNewConstMetric(powerSupplyMetrics["PowerSupply_Power_Fault"], prometheus.GaugeValue, psu.powerFaultToMetric(), psu.ServerName, psu.PowerSupplyID)
+		ctx.MetricChannel <- prometheus.MustNewConstMetric(powerSupplyMetrics["PowerSupply_Voltage_Fault"], prometheus.GaugeValue, psu.voltageFaultToMetric(), psu.ServerName, psu.PowerSupplyID)
 	}
 
 	log.Info("Power Supply Metrics collected")

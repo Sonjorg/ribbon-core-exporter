@@ -57,7 +57,7 @@ func processSyncStatus(ctx lib.MetricContext, xmlBody *[]byte,system []string) {
 	for _, name := range system {
 
    for _, status := range syncStatus.SyncStatuses {
-    ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(SyncStatusMetrics["Status"], prometheus.GaugeValue, syncStatusfunc(status.Status), status.SyncModule, name))
+     ctx.MetricChannel <- prometheus.MustNewConstMetric(SyncStatusMetrics["Status"], prometheus.GaugeValue, syncStatusfunc(status.Status), status.SyncModule, name)
    }
   }
   log.Info("Sync status metrics collected")

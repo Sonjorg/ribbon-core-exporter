@@ -63,7 +63,7 @@ func processSipArs(ctx lib.MetricContext, xmlBody *[]byte,system []string) {
 			endpoint = status.EndpointIpAddress
 		}
 
-		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(sipArsMetrics["SIPARS_Endpoint_State"], prometheus.GaugeValue, status.stateToFloat(), ctx.Zone, endpoint, status.EndpointIpPortNum, status.EndpointArsState))
+		ctx.MetricChannel <- prometheus.MustNewConstMetric(sipArsMetrics["SIPARS_Endpoint_State"], prometheus.GaugeValue, status.stateToFloat(), ctx.Zone, endpoint, status.EndpointIpPortNum, status.EndpointArsState)
 	}
 
 	log.Infof("SIP ARS Metrics for Address Context %q, zone %q collected", ctx.AddressContext, ctx.Zone)

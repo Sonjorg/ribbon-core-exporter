@@ -93,12 +93,12 @@ func processMemory(ctx lib.MetricContext, xmlBody *[]byte,system []string) {
   }
 
   for _, memory := range memoryUnits.MemoryUtilCurrentStatistics /*powerSupplies.PowerSupplyStatus*/ {
-    ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(MemoryMetrics["Memory_Average"], prometheus.GaugeValue, memory.Average, memory.CeName))
-    ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(MemoryMetrics["Memory_High"], prometheus.GaugeValue, memory.High, memory.CeName))
-    ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(MemoryMetrics["Memory_Low"], prometheus.GaugeValue, memory.Low, memory.CeName))
-    ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(MemoryMetrics["Memory_AverageSwap"], prometheus.GaugeValue, memory.AverageSwap, memory.CeName))
-    ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(MemoryMetrics["Memory_HighSwap"], prometheus.GaugeValue, memory.LowSwap, memory.CeName))
-    ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(MemoryMetrics["Memory_LowSwap"], prometheus.GaugeValue, memory.HighSwap, memory.CeName))
+    ctx.MetricChannel <- prometheus.MustNewConstMetric(MemoryMetrics["Memory_Average"], prometheus.GaugeValue, memory.Average, memory.CeName)
+    ctx.MetricChannel <- prometheus.MustNewConstMetric(MemoryMetrics["Memory_High"], prometheus.GaugeValue, memory.High, memory.CeName)
+    ctx.MetricChannel <- prometheus.MustNewConstMetric(MemoryMetrics["Memory_Low"], prometheus.GaugeValue, memory.Low, memory.CeName)
+    ctx.MetricChannel <- prometheus.MustNewConstMetric(MemoryMetrics["Memory_AverageSwap"], prometheus.GaugeValue, memory.AverageSwap, memory.CeName)
+    ctx.MetricChannel <- prometheus.MustNewConstMetric(MemoryMetrics["Memory_HighSwap"], prometheus.GaugeValue, memory.LowSwap, memory.CeName)
+    ctx.MetricChannel <- prometheus.MustNewConstMetric(MemoryMetrics["Memory_LowSwap"], prometheus.GaugeValue, memory.HighSwap, memory.CeName)
 
   }
 

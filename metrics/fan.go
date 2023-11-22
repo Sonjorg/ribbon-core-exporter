@@ -58,7 +58,7 @@ func processFans(ctx lib.MetricContext, xmlBody *[]byte,system []string) {
 			errors = append(errors, &err)
 			break
 		}
-		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(fanMetrics["Fan_Speed"], prometheus.GaugeValue, fanRpm, fan.ServerName, fan.FanID))
+		ctx.MetricChannel <- prometheus.MustNewConstMetric(fanMetrics["Fan_Speed"], prometheus.GaugeValue, fanRpm, fan.ServerName, fan.FanID)
 	}
 
 	log.Info("Fan Metrics collected")

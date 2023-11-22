@@ -85,11 +85,11 @@ func processMgmtPort(ctx lib.MetricContext, xmlBody *[]byte,system []string) {
 	}
 
 	for _, mgmtport := range mgmtPortStatus.MgmtPortStatuses /*powerSupplies.PowerSupplyStatus*/ {
-		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(MgmtPortMetrics["rxActualBandwidth"], prometheus.GaugeValue, mgmtport.RxActualBandwidth, mgmtport.CeName, mgmtport.PortName))
-		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(MgmtPortMetrics["txActualBandwidth"], prometheus.GaugeValue, mgmtport.TxActualBandwidth, mgmtport.CeName, mgmtport.PortName))
-		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(MgmtPortMetrics["rxPackets"], prometheus.GaugeValue, mgmtport.RxPackets, mgmtport.CeName, mgmtport.PortName))
-		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(MgmtPortMetrics["txPackets"], prometheus.GaugeValue, mgmtport.TxPackets, mgmtport.CeName, mgmtport.PortName))
-    ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(MgmtPortMetrics["linkstate"], prometheus.GaugeValue, convertLinkStateToNum(mgmtport.LinkState), mgmtport.CeName, mgmtport.PortName))
+		ctx.MetricChannel <- prometheus.MustNewConstMetric(MgmtPortMetrics["rxActualBandwidth"], prometheus.GaugeValue, mgmtport.RxActualBandwidth, mgmtport.CeName, mgmtport.PortName)
+		ctx.MetricChannel <- prometheus.MustNewConstMetric(MgmtPortMetrics["txActualBandwidth"], prometheus.GaugeValue, mgmtport.TxActualBandwidth, mgmtport.CeName, mgmtport.PortName)
+		ctx.MetricChannel <- prometheus.MustNewConstMetric(MgmtPortMetrics["rxPackets"], prometheus.GaugeValue, mgmtport.RxPackets, mgmtport.CeName, mgmtport.PortName)
+		ctx.MetricChannel <- prometheus.MustNewConstMetric(MgmtPortMetrics["txPackets"], prometheus.GaugeValue, mgmtport.TxPackets, mgmtport.CeName, mgmtport.PortName)
+    ctx.MetricChannel <- prometheus.MustNewConstMetric(MgmtPortMetrics["linkstate"], prometheus.GaugeValue, convertLinkStateToNum(mgmtport.LinkState), mgmtport.CeName, mgmtport.PortName)
 	}
 
 	log.Info("MgmtPort Metrics collected")

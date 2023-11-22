@@ -11,21 +11,18 @@
     "github.com/prometheus/client_golang/prometheus"
     log "github.com/sirupsen/logrus"
   )
-  var (
-    MetricArray []prometheus.Metric
-  )
+  
   const (
     CpuName      = "CPU"
     CpuUrlSuffix = "/restconf/data/sonusSystem:system/cpuUtilCurrentStatistics"
   )
- 
+  
   var CpuMetric = lib.SonusMetric{
     Name:       CpuName,
     Processor:  processCpu,
     URLGetter:  getCpuUrl,
     APIMetrics: CpuMetrics,
     Repetition: lib.RepeatNone,
-  MetricArray: MetricArray,
   }
   
   func getCpuUrl(ctx lib.MetricContext) string {
@@ -66,9 +63,9 @@
     }
   
     for _, cpu := range cpus.CpuUtilCurrentStatistics {
-      ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(CpuMetrics["Cpu_Average"], prometheus.GaugeValue, cpu.Average, cpu.CeName, cpu.CpuID))
-      ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(CpuMetrics["Cpu_High"], prometheus.GaugeValue, cpu.High, cpu.CeName, cpu.CpuID))
-      ctx.MetricArray= append(ctx.MetricArray,prometheus.MustNewConstMetric(CpuMetrics["Cpu_Low"], prometheus.GaugeValue, cpu.Low, cpu.CeName, cpu.CpuID))
+      ctx.MetricChannel <- prometheus.MustNewConstMetric(CpuMetrics["Cpu_Average"], prometheus.GaugeValue, cpu.Average, cpu.CeName, cpu.CpuID)
+      ctx.MetricChannel <- prometheus.MustNewConstMetric(CpuMetrics["Cpu_High"], prometheus.GaugeValue, cpu.High, cpu.CeName, cpu.CpuID)
+      ctx.MetricChannel <- prometheus.MustNewConstMetric(CpuMetrics["Cpu_Low"], prometheus.GaugeValue, cpu.Low, cpu.CeName, cpu.CpuID)
     }
   
     log.Info("CPU Metrics collected")

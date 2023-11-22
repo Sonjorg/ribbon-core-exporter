@@ -93,14 +93,14 @@ func processPacketPort(ctx lib.MetricContext, xmlBody *[]byte,system []string) {
 
 	for _, packetport := range packetPorts.PacketPortStatuses /*powerSupplies.PowerSupplyStatus*/ {
 
-		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(packetPortMetrics["RxActualBandwidth"], prometheus.GaugeValue, packetport.RxActualBandwidth, packetport.CeName, packetport.PortName))
-		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(packetPortMetrics["TxActualBandwidth"], prometheus.GaugeValue, packetport.TxActualBandwidth, packetport.CeName, packetport.PortName))
-		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(packetPortMetrics["AvgRxActualBW"], prometheus.GaugeValue, packetport.AvgRxActualBW, packetport.CeName, packetport.PortName))
-		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(packetPortMetrics["AvgTxActualBW"], prometheus.GaugeValue, packetport.AvgTxActualBW, packetport.CeName, packetport.PortName))
-		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(packetPortMetrics["PeakRxActualBW"], prometheus.GaugeValue, packetport.PeakRxActualBW, packetport.CeName, packetport.PortName))
-		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(packetPortMetrics["PeakTxActualBW"], prometheus.GaugeValue, packetport.PeakTxActualBW, packetport.CeName, packetport.PortName))
-		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(packetPortMetrics["LinkState"], prometheus.GaugeValue, convertLinkStateToNum(packetport.LinkState), packetport.CeName, packetport.PortName))
-		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(packetPortMetrics["NegotiatedSpeed"], prometheus.GaugeValue, convertSpeedToNum(packetport.NegotiatedSpeed), packetport.CeName, packetport.PortName))
+		ctx.MetricChannel <- prometheus.MustNewConstMetric(packetPortMetrics["RxActualBandwidth"], prometheus.GaugeValue, packetport.RxActualBandwidth, packetport.CeName, packetport.PortName)
+		ctx.MetricChannel <- prometheus.MustNewConstMetric(packetPortMetrics["TxActualBandwidth"], prometheus.GaugeValue, packetport.TxActualBandwidth, packetport.CeName, packetport.PortName)
+		ctx.MetricChannel <- prometheus.MustNewConstMetric(packetPortMetrics["AvgRxActualBW"], prometheus.GaugeValue, packetport.AvgRxActualBW, packetport.CeName, packetport.PortName)
+		ctx.MetricChannel <- prometheus.MustNewConstMetric(packetPortMetrics["AvgTxActualBW"], prometheus.GaugeValue, packetport.AvgTxActualBW, packetport.CeName, packetport.PortName)
+		ctx.MetricChannel <- prometheus.MustNewConstMetric(packetPortMetrics["PeakRxActualBW"], prometheus.GaugeValue, packetport.PeakRxActualBW, packetport.CeName, packetport.PortName)
+		ctx.MetricChannel <- prometheus.MustNewConstMetric(packetPortMetrics["PeakTxActualBW"], prometheus.GaugeValue, packetport.PeakTxActualBW, packetport.CeName, packetport.PortName)
+		ctx.MetricChannel <- prometheus.MustNewConstMetric(packetPortMetrics["LinkState"], prometheus.GaugeValue, convertLinkStateToNum(packetport.LinkState), packetport.CeName, packetport.PortName)
+		ctx.MetricChannel <- prometheus.MustNewConstMetric(packetPortMetrics["NegotiatedSpeed"], prometheus.GaugeValue, convertSpeedToNum(packetport.NegotiatedSpeed), packetport.CeName, packetport.PortName)
 
 	}
 

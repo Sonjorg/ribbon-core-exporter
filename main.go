@@ -24,7 +24,7 @@ var (
 		metrics.FanMetric,
 		metrics.DiskStatusMetric,
 		metrics.DiskUsageMetric,
-	        metrics.MemoryMetric,
+		metrics.MemoryMetric,
 		metrics.CpuMetric,
 		metrics.IPInterfaceMetric,
 		metrics.PowerSupplyMetric,

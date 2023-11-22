@@ -22,8 +22,6 @@ var DiskStatusMetric = lib.SonusMetric{
 	URLGetter:  getDiskStatusUrl,
 	APIMetrics: diskStatusMetrics,
 	Repetition: lib.RepeatNone,
-	MetricArray: MetricArray,
-
 }
 
 func getDiskStatusUrl(ctx lib.MetricContext) string {
@@ -71,9 +69,9 @@ func processDiskStatus(ctx lib.MetricContext, xmlBody *[]byte,system []string) {
 			break
 		}
 
-		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(diskStatusMetrics["Disk_Status"], prometheus.GaugeValue, disk.statusToFloat(), disk.ServerName, disk.ProductId))
-		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(diskStatusMetrics["Disk_healthtest"], prometheus.GaugeValue, disk.healtToFloat(), disk.ServerName))
-		ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(diskStatusMetrics["Disk_Size"], prometheus.GaugeValue, diskSpace, disk.ServerName))
+		ctx.MetricChannel <- prometheus.MustNewConstMetric(diskStatusMetrics["Disk_Status"], prometheus.GaugeValue, disk.statusToFloat(), disk.ServerName, disk.ProductId)
+		ctx.MetricChannel <- prometheus.MustNewConstMetric(diskStatusMetrics["Disk_healthtest"], prometheus.GaugeValue, disk.healtToFloat(), disk.ServerName)
+		ctx.MetricChannel <- prometheus.MustNewConstMetric(diskStatusMetrics["Disk_Size"], prometheus.GaugeValue, diskSpace, disk.ServerName)
 	}
 
 	log.Info("Diskstatus Metrics collected")

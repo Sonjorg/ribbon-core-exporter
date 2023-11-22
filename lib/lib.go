@@ -14,7 +14,6 @@ type (
 		Processor  func(MetricContext, *[]byte,[]string)
 		URLGetter  func(MetricContext) string
 		APIMetrics map[string]*prometheus.Desc
-		MetricArray     []prometheus.Metric
 		Repetition
 	}
 
@@ -25,7 +24,6 @@ type (
 		Zone             string
 		IPInterfaceGroup string
 		MetricChannel    chan<- prometheus.Metric
-		MetricArray     []prometheus.Metric
 		ResultChannel    chan<- MetricResult
 	}
 
@@ -36,7 +34,6 @@ type (
 		Errors  []*error
 	}
 )
-
 
 const (
 	RepeatNone Repetition = iota

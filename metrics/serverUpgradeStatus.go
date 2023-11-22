@@ -54,7 +54,7 @@ package metrics
     }
   
     for _, status := range statuses.ServerSoftwareUpgradeStatuses {
-      ctx.MetricArray = append(ctx.MetricArray,prometheus.MustNewConstMetric(SoftwareUpgradeMetrics["upgradeStatus"], prometheus.GaugeValue, convertUpgradeStatusToNum(status.UpgradeStatus), status.Server))
+      ctx.MetricChannel <- prometheus.MustNewConstMetric(SoftwareUpgradeMetrics["upgradeStatus"], prometheus.GaugeValue, convertUpgradeStatusToNum(status.UpgradeStatus), status.Server)
     }
   
     log.Info("SoftwareUpgrade Metrics collected")
