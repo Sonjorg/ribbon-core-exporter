@@ -4,8 +4,8 @@ LABEL maintainer "HDO"
 RUN apk --no-cache add ca-certificates \
      && apk --no-cache add --virtual build-deps git gcc musl-dev
 
-COPY ./ /go/src/github.com/teliax/sonus-metrics-exporter
-WORKDIR /go/src/github.com/teliax/sonus-metrics-exporter
+COPY ./ /go/src/gitlab.hdo.no/fg-telefoni/core-exporter
+WORKDIR /go/src/gitlab.hdo.no/fg-telefoni/core-exporter
 
 RUN go get \
  && go test ./... \

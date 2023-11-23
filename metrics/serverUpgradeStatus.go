@@ -1,8 +1,7 @@
 package metrics
 
-// here be software upgrade status metrics.
+// software upgrade status
 
-//Mangler softwareUpgradeStatus, se nederst i fila
 
   import (
     "encoding/xml"
@@ -32,8 +31,8 @@ package metrics
 
   var SoftwareUpgradeMetrics = map[string]*prometheus.Desc{
     "upgradeStatus": prometheus.NewDesc(
-      prometheus.BuildFQName("ribbon", "ServerSoftwareUpgrade", "status"),
-      "0=upgraded, 1=upgrading, 2=pendingUpgrade",
+      prometheus.BuildFQName("ribbon", "system", "SoftwareUpgrade_status"),
+      "Indicates the current status of the server: 0=upgraded, 1=upgrading, 2=pendingUpgrade",
       []string{"server"}, nil,
     ),
   }
@@ -60,7 +59,20 @@ package metrics
     log.Info("SoftwareUpgrade Metrics collected")
     ctx.ResultChannel <- lib.MetricResult{Name: SoftwareUpgradeName, Success: true}
   }
-    
+   
+    /*
+<collection xmlns="http://tail-f.com/ns/restconf/collection/1.0">
+  <serverSoftwareUpgradeStatus xmlns="http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0"  xmlns:SYS="http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0">
+    <name>NOGJHDO-SBC-01ta</name>
+    <upgradeStatus>upgraded</upgradeStatus>
+  </serverSoftwareUpgradeStatus>
+  <serverSoftwareUpgradeStatus xmlns="http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0"  xmlns:SYS="http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0">
+    <name>NOGJHDO-SBC-01tb</name>
+    <upgradeStatus>upgraded</upgradeStatus>
+  </serverSoftwareUpgradeStatus>
+</collection>
+*/
+
   type ServerSoftwareUpgradeStatusCollection struct {
     ServerSoftwareUpgradeStatuses []*ServerSoftwareUpgradeStatus `xml:"serverSoftwareUpgradeStatus,omitempty"`
   }
@@ -82,33 +94,3 @@ package metrics
     return 0
   }
 
-  /*
-<collection xmlns="http://tail-f.com/ns/restconf/collection/1.0">
-  <serverSoftwareUpgradeStatus xmlns="http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0"  xmlns:SYS="http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0">
-    <name>NOGJHDO-SBC-01ta</name>
-    <upgradeStatus>upgraded</upgradeStatus>
-  </serverSoftwareUpgradeStatus>
-  <serverSoftwareUpgradeStatus xmlns="http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0"  xmlns:SYS="http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0">
-    <name>NOGJHDO-SBC-01tb</name>
-    <upgradeStatus>upgraded</upgradeStatus>
-  </serverSoftwareUpgradeStatus>
-</collection>
-
-
-
-/restconf/data/sonusSystem:system/softwareUpgradeStatus
-
-<softwareUpgradeStatus xmlns="http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0"  xmlns:SYS="http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0">
-  <state>upgradeDone</state>
-  <previousState>upgrading</previousState>
-  <upgradeStartTime>Wed May 31 13:59:15 2023</upgradeStartTime>
-  <upgradeCompleteTime>Wed May 31 14:47:49 2023</upgradeCompleteTime>
-  <package>sbc-V10.01.04-R001.x86_64.tar.gz</package>
-  <reason>successfulCompletion</reason>
-  <oldRelease>V10.01.03R002</oldRelease>
-  <newRelease>V10.01.04R001</newRelease>
-  <primaryUpgradeStatus>upgraded</primaryUpgradeStatus>
-  <secondaryUpgradeStatus>upgraded</secondaryUpgradeStatus>
-</softwareUpgradeStatus>
-
-*/

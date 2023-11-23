@@ -43,8 +43,8 @@ var tgMetrics = map[string]*prometheus.Desc{
 		[]string{"zone", "name"}, nil,
 	),
 	"TG_TotalChans": prometheus.NewDesc(
-		prometheus.BuildFQName("ribbon", "TG", "channels"),
-		"Number of configured channels",
+		prometheus.BuildFQName("ribbon", "TG", "channels_configured"),
+		"Number of configured calls per TG",
 		[]string{"zone", "name"}, nil,
 	),
 	"TG_Usage": prometheus.NewDesc(

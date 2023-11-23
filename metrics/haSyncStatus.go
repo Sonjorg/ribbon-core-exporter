@@ -1,9 +1,6 @@
-
-// HA system sync status details
 package metrics
 
-
-//CPU usage metrics...
+// HA server sync status details
 
 import (
   "encoding/xml"
@@ -34,8 +31,8 @@ func getSyncStatusUrl(ctx lib.MetricContext) string {
 
 var SyncStatusMetrics = map[string]*prometheus.Desc{
   "Status": prometheus.NewDesc(
-    prometheus.BuildFQName("ribbon", "sync_status", "details"),
-    "1:Sync completed, 0:not completed",
+    prometheus.BuildFQName("ribbon", "system", "sync_status_details"),
+    "Indicates the server data synchronization state 1:Sync completed, 0:not completed",
     []string{"syncModule","systemName"}, nil,
   ),  
 }
@@ -64,12 +61,22 @@ func processSyncStatus(ctx lib.MetricContext, xmlBody *[]byte,system []string) {
   ctx.ResultChannel <- lib.MetricResult{Name: SyncStatusName, Success: true}
 }
   
+
+/*
+<collection xmlns="http://tail-f.com/ns/restconf/collection/1.0">
+  <syncStatus xmlns="http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0"  xmlns:SYS="http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0">
+    <syncModule>Policy Data</syncModule>
+    <status>syncCompleted</status>
+  </syncStatus>
+*/
+
+
 type SyncStatusCollection struct {
   SyncStatuses []*SyncStatus `xml:"syncStatus,omitempty"`
 }
 
 type SyncStatus struct {
-  SyncModule  string    `xml:"syncModule"`//http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0 ceName
+  SyncModule  string    `xml:"syncModule"`
   Status   string    `xml:"status"`
 }
 
@@ -79,29 +86,3 @@ func syncStatusfunc(status string) float64{
    }else {
       return 0}
 }
-/*
-restconf/data/sonusSystem:system/syncStatus
-
-ATTRIBUTEKEY	syncModule	Identifies the syncronization item.
-ATTRIBUTE	status	Indicates the inter-CE data synchronization state.
-
-<collection xmlns="http://tail-f.com/ns/restconf/collection/1.0">
-  <syncStatus xmlns="http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0"  xmlns:SYS="http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0">
-    <syncModule>Policy Data</syncModule>
-    <status>syncCompleted</status>
-  </syncStatus>
-  <syncStatus xmlns="http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0"  xmlns:SYS="http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0">
-    <syncModule>Disk Mirroring</syncModule>
-    <status>syncCompleted</status>
-  </syncStatus>
-  <syncStatus xmlns="http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0"  xmlns:SYS="http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0">
-    <syncModule>Configuration Data</syncModule>
-    <status>syncCompleted</status>
-  </syncStatus>
-  <syncStatus xmlns="http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0"  xmlns:SYS="http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0">
-    <syncModule>Call/Registration Data</syncModule>
-    <status>syncCompleted</status>
-  </syncStatus>
-</collection>
-
-*/

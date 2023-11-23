@@ -92,7 +92,7 @@ func processMemory(ctx lib.MetricContext, xmlBody *[]byte,system []string) {
     return
   }
 
-  for _, memory := range memoryUnits.MemoryUtilCurrentStatistics /*powerSupplies.PowerSupplyStatus*/ {
+  for _, memory := range memoryUnits.MemoryUtilCurrentStatistics {
     ctx.MetricChannel <- prometheus.MustNewConstMetric(MemoryMetrics["Memory_Average"], prometheus.GaugeValue, memory.Average, memory.CeName)
     ctx.MetricChannel <- prometheus.MustNewConstMetric(MemoryMetrics["Memory_High"], prometheus.GaugeValue, memory.High, memory.CeName)
     ctx.MetricChannel <- prometheus.MustNewConstMetric(MemoryMetrics["Memory_Low"], prometheus.GaugeValue, memory.Low, memory.CeName)

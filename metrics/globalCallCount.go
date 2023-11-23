@@ -32,53 +32,57 @@ func getCallCountUrl(ctx lib.MetricContext) string {
 var CallCountMetrics = map[string]*prometheus.Desc{
 	"callAttempts": prometheus.NewDesc(
 		prometheus.BuildFQName("ribbon", "global", "callAttempts"),
-		"callAttempts",
+		"Number of call attempts on this system",
 		[]string{"key", "systemName"}, nil,
 	),
 	"callCompletions": prometheus.NewDesc(
 		prometheus.BuildFQName("ribbon", "global", "callCompletions"),
-		"callCompletions",
+		"Total number of completed call attempts on this system",
 		[]string{"key", "systemName"}, nil,
-	),
+	),	
 	"activeCalls": prometheus.NewDesc(
 		prometheus.BuildFQName("ribbon", "global", "activeCalls"),
-		"activeCalls",
+		"Current number of active managed calls on this system",
 		[]string{"key", "systemName"}, nil,
-	),
+	),	
 	"stableCalls": prometheus.NewDesc(
 		prometheus.BuildFQName("ribbon", "global", "stableCalls"),
-		"stableCalls.",
+		"Current number of stable managed calls on this system",
 		[]string{"key", "systemName"}, nil,
-	),
+	),	
 	"callUpdates": prometheus.NewDesc(
 		prometheus.BuildFQName("ribbon", "global", "callUpdates"),
-		"callUpdates.",
+		"Number of call updates (modifications) on this system",
 		[]string{"key", "systemName"}, nil,
-	),
+	),	
 	"activeCallsNonUser": prometheus.NewDesc(
 		prometheus.BuildFQName("ribbon", "global", "activeCallsNonUser"),
-		"activeCallsNonUser.",
+		"Current number of active non-call associated signalling channels in the system",
 		[]string{"key", "systemName"}, nil,
-	),
+	),	
 	"stableCallsNonUser": prometheus.NewDesc(
 		prometheus.BuildFQName("ribbon", "global", "stableCallsNonUser"),
-		"stableCallsNonUser.",
+		"Current number of stable non-call associated signalling channels in the system",
 		[]string{"key", "systemName"}, nil,
-	), "totalCalls": prometheus.NewDesc(
+	), 
+	"totalCalls": prometheus.NewDesc(
 		prometheus.BuildFQName("ribbon", "global", "totalCalls"),
-		"totalCalls.",
+		"Total number of calls on this system.",
 		[]string{"key", "systemName"}, nil,
-	), "totalCallsNonUser": prometheus.NewDesc(
+	), 
+	"totalCallsNonUser": prometheus.NewDesc(
 		prometheus.BuildFQName("ribbon", "global", "totalCallsNonUser"),
-		"totalCallsNonUser.",
+		"Total number of non-user calls on this system",
 		[]string{"key", "systemName"}, nil,
-	), "totalCallsEmergEstablishing": prometheus.NewDesc(
+	), 
+	"totalCallsEmergEstablishing": prometheus.NewDesc(
 		prometheus.BuildFQName("ribbon", "global", "totalCallsEmergEstablishing"),
-		"totalCallsEmergEstablishing.",
+		"Number of establishing emergency calls (i.e. not yet stable)",
 		[]string{"key", "systemName"}, nil,
-	), "totalCallsEmergStable": prometheus.NewDesc(
+	), 
+	"totalCallsEmergStable": prometheus.NewDesc(
 		prometheus.BuildFQName("ribbon", "global", "totalCallsEmergStable"),
-		"totalCallsEmergStable.",
+		"Number of stable emergency calls",
 		[]string{"key", "systemName"}, nil,
 	),
 }

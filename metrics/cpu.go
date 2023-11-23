@@ -61,6 +61,17 @@
       ctx.ResultChannel <- lib.MetricResult{Name: CpuName, Success: false, Errors: errors}
       return
     }
+
+    /*
+<collection xmlns="http://tail-f.com/ns/restconf/collection/1.0">
+  <cpuUtilCurrentStatistics xmlns="http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0"  xmlns:SYS="http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0">
+    <ceName>NOGJHDO-SBC-01ta</ceName>
+    <cpu>1</cpu>
+    <average>0</average>
+    <high>2</high>
+    <low>0</low>
+  </cpuUtilCurrentStatistics>
+ */
   
     for _, cpu := range cpus.CpuUtilCurrentStatistics {
       ctx.MetricChannel <- prometheus.MustNewConstMetric(CpuMetrics["Cpu_Average"], prometheus.GaugeValue, cpu.Average, cpu.CeName, cpu.CpuID)
@@ -84,13 +95,3 @@
     Low     float64   `xml:"low"`
   }
 
-/*
-<collection xmlns="http://tail-f.com/ns/restconf/collection/1.0">
-  <cpuUtilCurrentStatistics xmlns="http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0"  xmlns:SYS="http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0">
-    <ceName>NOGJHDO-SBC-01ta</ceName>
-    <cpu>1</cpu>
-    <average>0</average>
-    <high>2</high>
-    <low>0</low>
-  </cpuUtilCurrentStatistics>
- */

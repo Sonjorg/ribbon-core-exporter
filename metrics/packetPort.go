@@ -1,11 +1,5 @@
 package metrics
 
-//packet / mediaport metrics
-
-// /restconf/data/sonusSystem:system/sonusOrcaSystem:ethernetPort/packetPortStatus
-
-//memory metrics
-//The memory utilization for the current interval period.
 
 import (
 	"encoding/xml"
@@ -35,7 +29,7 @@ func getPacketPortUrl(ctx lib.MetricContext) string {
 
 var packetPortMetrics = map[string]*prometheus.Desc{
 	"RxActualBandwidth": prometheus.NewDesc(
-		prometheus.BuildFQName("ribbon", "ethernetport", "rxActualBandwidth"),
+		prometheus.BuildFQName("ribbon", "ethernetport", "RxActualBandwidth"),
 		"Actual Rx bandwidth in use on this port, bytes/sec.",
 		[]string{"server", "port"}, nil,
 	),
@@ -65,7 +59,7 @@ var packetPortMetrics = map[string]*prometheus.Desc{
 		[]string{"server", "port"}, nil,
 	),
 	"LinkState": prometheus.NewDesc(
-		prometheus.BuildFQName("ribbon", "ethernetport", "linkstate"),
+		prometheus.BuildFQName("ribbon", "ethernetport_packetPort", "linkstate"),
 		"0:null,1:Dsabld,2:PortDown,3:PortUp,4:DisabldNoLicense,5:EnbldPortDownInvalidSfpWrongSpeed,6:EnbldPortDownInvalidSfpNonSonus",
 		[]string{"server", "port"}, nil,
 	),
@@ -123,21 +117,4 @@ type PacketPortStatus struct {
 	PeakRxActualBW    float64 `xml:"peakRxActualBW"`
 	PeakTxActualBW    float64 `xml:"peakTxActualBW"`
 	NegotiatedSpeed   string  `xml:"negotiatedSpeed"`
-}
-
-func convertSpeedToNum(negotiatedSpeed string) float64 {
-	switch negotiatedSpeed {
-	case "speed10Mbps":
-		return 1
-	case "speed100Mbps":
-		return 2
-	case "speed1000Mbps":
-		return 3
-	case "unknown":
-		return 4
-	case "speed10000Mbps":
-		return 5
-
-	}
-	return 4
 }

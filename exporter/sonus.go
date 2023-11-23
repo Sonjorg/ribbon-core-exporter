@@ -50,13 +50,13 @@ var serverStatusMetrics = map[string]*prometheus.Desc{
 
 var zoneStatusMetrics = map[string]*prometheus.Desc{
 	"Zone_Total_Calls_Configured": prometheus.NewDesc(
-		prometheus.BuildFQName("ribbon", "zone", "total_calls_configured"),
-		"Total call limit per zone",
+		prometheus.BuildFQName("ribbon", "zone", "channels_configured"),
+		"Number of configured calls per zone",
 		[]string{"addresscontext", "zone"}, nil,
 	),
 	"Zone_Usage_Total": prometheus.NewDesc(
-		prometheus.BuildFQName("ribbon", "zone", "usage_total"),
-		"Total call limit per zone",
+		prometheus.BuildFQName("ribbon", "zone", "activeCalls"),
+		"Total active calls per per zone",
 		[]string{"direction", "addresscontext", "zone"}, nil,
 	),
 }
@@ -229,6 +229,7 @@ func processIPInterfaceGroups(addressContext *addressContext, xmlBody *[]byte) e
 		log.Errorf("Failed to deserialize ipInterfaceGroup XML: %v", err)
 		return err
 	}
-	fmt.Println("Interface groups: ",addressContext.IPInterfaceGroups)
+	//fmt.Println("Interface groups: ",addressContext.IPInterfaceGroups)
+ //   log.Info("IpInterfaceGroup: %v collected")
 	return nil
 }

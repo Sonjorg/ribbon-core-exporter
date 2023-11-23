@@ -2,7 +2,7 @@ package exporter
 
 import (
 	"crypto/tls"
-	"fmt"
+//	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -135,7 +135,7 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 			log.Errorf("Unable to perform HTTP request to %q. Error: %v", ipInterfaceGroupUrl, err)
 			return
 		}
-		fmt.Println(response.response)
+		//fmt.Println(response.response)
 		if response.response.StatusCode != 200 {
 			log.Errorf("Non-200 HTTP reponse (%d) to %q.", response.response.StatusCode, ipInterfaceGroupUrl)
 			return
@@ -147,7 +147,7 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 	system := ProcessSystemName(apiBase + systemUrlSuffix) 
 
 	// Perform HTTP requests one at a time then delegate xml deserialization and metric processing to a goroutine
-	go func() {
+	//go func() {
 		for _, metric := range e.Metrics {
 			ctx := lib.MetricContext{APIBase: apiBase, MetricChannel: ch, ResultChannel: results}
 			if metric.Repetition == lib.RepeatNone {
@@ -182,7 +182,7 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 				}
 			}
 		}
-	}()
+	//}()
 
 	for {
 		select {
