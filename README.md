@@ -18,6 +18,8 @@ This exporter is setup to take input from environment variables:
 * `LISTEN_PORT` The port you wish to run the container on, the Dockerfile defaults this to `9172`
 * `METRICS_PATH` the metrics URL path you wish to use, defaults to `/metrics`
 * `LOG_LEVEL` The level of logging the exporter will run with, defaults to `debug`
+*`EXCLUDE_LIST` You can choose to exclude any collector by adding its name to the list. The following excludes all collectors. For example:
+``` docker run --restart=always -p 4123:9172 -e API_USER="" -e API_PASSWORD="" -e API_URLS="https://domainurl.com" -e API_ADDRESSCONTEXTS="PROD" -e EXCLUDE_LIST="CPU,DiskStatus,DSP,Fan,SyncStatus,IpPolicingAlarmStatus,Memory,MgmtPortStatus,PacketPortStatus,hardDiskUsage,PowerSupply,ServerSoftWareUpgradeStatus,SIP ARS,SipStatistic,TrunkGroup" ribbon-core-exporter ```
 
 
 ## Install and deploy
