@@ -31,22 +31,22 @@ var IpPolicingMetrics = map[string]*prometheus.Desc{
 	"AlarmDuration": prometheus.NewDesc(
 		prometheus.BuildFQName("ribbon", "ipPolicing", "alarmDuration"),
 		"Number of seconds the system {type} policer alarm has been at this level.",
-		[]string{"systemName","alarmLevel", "type"}, nil,
+		[]string{"system","alarmLevel", "type"}, nil,
 	),
 	"DiscardRate": prometheus.NewDesc(
 		prometheus.BuildFQName("ribbon", "ipPolicing", "discardRate"),
 		"Current rate of {type} discards for the system.",
-		[]string{"systemName","alarmLevel", "type"}, nil,
+		[]string{"system","alarmLevel", "type"}, nil,
 	),
   "PacketsDiscarded": prometheus.NewDesc(
 		prometheus.BuildFQName("ribbon", "ipPolicing", "packetsDiscarded"),
 		"Total number of packets discarded by {type} policers on the system.",
-		[]string{"systemName","alarmLevel", "type"}, nil,
+		[]string{"system","alarmLevel", "type"}, nil,
 	),
   "PacketsAccepted": prometheus.NewDesc(
 		prometheus.BuildFQName("ribbon", "ipPolicing", "packetsAccepted"),
 		"Total number of {type} packets accepted on the system.",
-		[]string{"systemName", "alarmLevel","type"}, nil,
+		[]string{"system", "alarmLevel","type"}, nil,
 	),
 }
 

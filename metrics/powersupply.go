@@ -37,6 +37,11 @@ var powerSupplyMetrics = map[string]*prometheus.Desc{
 		"Is there a voltage fault, per supply",
 		[]string{"server", "powerSupplyID"}, nil,
 	),
+	"PowerSupply_present": prometheus.NewDesc(
+		prometheus.BuildFQName("ribbon", "powersupply", "present"),
+		"Is the powersupply installed in the server",
+		[]string{"server", "powerSupplyID"}, nil,
+	),
 }
 
 func processPowerSupplies(ctx lib.MetricContext, xmlBody *[]byte,system []string) {
@@ -57,6 +62,7 @@ func processPowerSupplies(ctx lib.MetricContext, xmlBody *[]byte,system []string
 	for _, psu := range powerSupplies.PowerSupplyStatus {
 		ctx.MetricChannel <- prometheus.MustNewConstMetric(powerSupplyMetrics["PowerSupply_Power_Fault"], prometheus.GaugeValue, psu.powerFaultToMetric(), psu.ServerName, psu.PowerSupplyID)
 		ctx.MetricChannel <- prometheus.MustNewConstMetric(powerSupplyMetrics["PowerSupply_Voltage_Fault"], prometheus.GaugeValue, psu.voltageFaultToMetric(), psu.ServerName, psu.PowerSupplyID)
+		ctx.MetricChannel <- prometheus.MustNewConstMetric(powerSupplyMetrics["PowerSupply_present"], prometheus.GaugeValue, psu.presentToMetric(), psu.ServerName, psu.PowerSupplyID)
 	}
 
 	log.Info("Power Supply Metrics collected")
@@ -93,6 +99,14 @@ type powerSupplyStatus struct {
 
 func (p powerSupplyStatus) powerFaultToMetric() float64 {
 	if p.PowerFault {
+		return 1
+	} else {
+		return 0
+	}
+}
+
+func (p powerSupplyStatus) presentToMetric() float64 {
+	if p.Present {
 		return 1
 	} else {
 		return 0

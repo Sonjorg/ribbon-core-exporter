@@ -59,7 +59,7 @@ var packetPortMetrics = map[string]*prometheus.Desc{
 		[]string{"server", "port"}, nil,
 	),
 	"LinkState": prometheus.NewDesc(
-		prometheus.BuildFQName("ribbon", "ethernetport_packetPort", "linkstate"),
+		prometheus.BuildFQName("ribbon", "ethernetport", "linkstate"),
 		"0:null,1:Dsabld,2:PortDown,3:PortUp,4:DisabldNoLicense,5:EnbldPortDownInvalidSfpWrongSpeed,6:EnbldPortDownInvalidSfpNonSonus",
 		[]string{"server", "port"}, nil,
 	),

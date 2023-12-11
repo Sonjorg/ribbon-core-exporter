@@ -33,17 +33,17 @@
     "Cpu_Average": prometheus.NewDesc(
       prometheus.BuildFQName("ribbon", "cpu", "average"),
       "The average cpu % utilization for this interval.",
-      []string{"serverName", "cpuID"}, nil,
+      []string{"server", "cpuID"}, nil,
     ),
     "Cpu_High": prometheus.NewDesc(
       prometheus.BuildFQName("ribbon", "cpu", "high"),
       "The high cpu % utilization for this interval.",
-      []string{"serverName", "cpuID"}, nil,
+      []string{"server", "cpuID"}, nil,
     ),
     "Cpu_Low": prometheus.NewDesc(
       prometheus.BuildFQName("ribbon", "cpu", "low"),
       "The low cpu % utilization for this interval.",
-      []string{"serverName", "cpuID"}, nil,
+      []string{"server", "cpuID"}, nil,
     ),
   }
   

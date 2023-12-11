@@ -33,7 +33,7 @@ var SyncStatusMetrics = map[string]*prometheus.Desc{
   "Status": prometheus.NewDesc(
     prometheus.BuildFQName("ribbon", "system", "sync_status_details"),
     "Indicates the server data synchronization state 1:Sync completed, 0:not completed",
-    []string{"syncModule","systemName"}, nil,
+    []string{"syncModule","system"}, nil,
   ),  
 }
 

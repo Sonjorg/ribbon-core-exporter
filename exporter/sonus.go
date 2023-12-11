@@ -41,10 +41,10 @@ var serverStatusMetrics = map[string]*prometheus.Desc{
 		"Current uptime of server, in seconds",
 		[]string{"server", "type"}, nil,
 	),
-	"System_Status": prometheus.NewDesc(
-		prometheus.BuildFQName("ribbon", "system", "status"),
+	"System_Info": prometheus.NewDesc(
+		prometheus.BuildFQName("ribbon", "system", "info"),
 		"Current status of server",
-		[]string{"server", "restart", "platform", "serial"}, nil,
+		[]string{"server", "HwType", "restart", "platformVersion", "applicationVersion", "serial"}, nil,
 	),
 }
 
@@ -101,7 +101,10 @@ type (
 		ApplicationUptime        string `xml:"http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0 applicationUpTime"`
 		SyncStatus               string `xml:"http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0 syncStatus"`
 		LastRestartReason        string `xml:"http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0 lastRestartReason"`
-		PlatformVersion          string `xml:"http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0 platformVersion"`		
+		PlatformVersion          string `xml:"http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0 platformVersion"`
+		ApplicationVersion       string `xml:"http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0 applicationVersion"`
+		HwType          		 string `xml:"http://sonusnet.com/ns/mibs/SONUS-SYSTEM-MIB/1.0 hwType"`
+					
 	}
 
 	serverUptimeType uint8
@@ -201,7 +204,7 @@ func processServerStatus(xmlBody *[]byte, ch chan<- prometheus.Metric) error {
 		ch <- prometheus.MustNewConstMetric(serverStatusMetrics["System_Sync_Status"], prometheus.GaugeValue, server.syncStatusToFloat(), server.Name, server.SyncStatus)
 		ch <- prometheus.MustNewConstMetric(serverStatusMetrics["System_Uptime"], prometheus.CounterValue, server.parseUptime(serverOSUptime), server.Name, "os")
 		ch <- prometheus.MustNewConstMetric(serverStatusMetrics["System_Uptime"], prometheus.CounterValue, server.parseUptime(serverAppUptime), server.Name, "application")
-		ch <- prometheus.MustNewConstMetric(serverStatusMetrics["System_Status"], prometheus.GaugeValue, 1, server.Name, server.LastRestartReason, server.PlatformVersion, server.SerialNum)
+		ch <- prometheus.MustNewConstMetric(serverStatusMetrics["System_Info"], prometheus.GaugeValue, 1, server.Name, server.HwType, server.LastRestartReason, server.PlatformVersion, server.ApplicationVersion, server.SerialNum)
 	}  // 
 	log.Info("Server Status and Metrics collected")
 	return nil
