@@ -52,6 +52,7 @@ func main() {
 	ex := exporter.Exporter{
 		Metrics: metricList,
 		Config:  applicationCfg,
+		
 	}
 
 	// Register Metrics from each of the endpoints

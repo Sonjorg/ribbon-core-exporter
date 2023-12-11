@@ -149,45 +149,47 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 	// Perform HTTP requests one at a time then delegate xml deserialization and metric processing to a goroutine
 	//go func() {
 		for _, metric := range e.Metrics {
+			var boolExcluded bool = false
 			for _,excluded := range e.Config.ExcludeList {
 					if metric.Name == excluded {
 							boolExcluded = true
 					}
 			}
-			if !boolExcluded {
+		
 			ctx := lib.MetricContext{APIBase: apiBase, MetricChannel: ch, ResultChannel: results}
-			if metric.Repetition == lib.RepeatNone {
-					collectCount++
-					doHTTPAndProcess(e, metric, ctx, httpClient,system)
-			} else if metric.Repetition == lib.RepeatPerAddressContext {
-					for _, ac := range addressContexts {
-							ctx.AddressContext = ac.Name
+			if !boolExcluded {
+				if metric.Repetition == lib.RepeatNone {
+						collectCount++
+						doHTTPAndProcess(e, metric, ctx, httpClient,system)
+				} else if metric.Repetition == lib.RepeatPerAddressContext {
+						for _, ac := range addressContexts {
+								ctx.AddressContext = ac.Name
 
-							collectCount++
-							doHTTPAndProcess(e, metric, ctx, httpClient,system)
-					}
-			} else if metric.Repetition == lib.RepeatPerAddressContextZone {
-					for _, ac := range addressContexts {
-							for _, zone := range ac.Zones {
-									ctx.AddressContext = ac.Name
-									ctx.Zone = zone.Name
-
-									collectCount++
-									doHTTPAndProcess(e, metric, ctx, httpClient,system)
+								collectCount++
+								doHTTPAndProcess(e, metric, ctx, httpClient,system)
+						}
+				} else if metric.Repetition == lib.RepeatPerAddressContextZone {
+						for _, ac := range addressContexts {
+								for _, zone := range ac.Zones {
+										ctx.AddressContext = ac.Name
+										ctx.Zone = zone.Name
+	
+										collectCount++
+										doHTTPAndProcess(e, metric, ctx, httpClient,system)
 							}
 					}
-			} else if metric.Repetition == lib.RepeatPerAddressContextIpInterfaceGroup {
-					for _, ac := range addressContexts {
-							for _, ipig := range ac.IPInterfaceGroups {
-									ctx.AddressContext = ac.Name
-									ctx.IPInterfaceGroup = ipig.Name
+				} else if metric.Repetition == lib.RepeatPerAddressContextIpInterfaceGroup {
+						for _, ac := range addressContexts {
+								for _, ipig := range ac.IPInterfaceGroups {
+										ctx.AddressContext = ac.Name
+										ctx.IPInterfaceGroup = ipig.Name
 
-									collectCount++
-									doHTTPAndProcess(e, metric, ctx, httpClient,system)
+										collectCount++
+										doHTTPAndProcess(e, metric, ctx, httpClient,system)
 							}
-					}
+						}
+				}
 			}
-	}
 }
 	//}()
 
@@ -198,7 +200,7 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 			metricDisposition.WithLabelValues(result.Name, successString).Inc()
 
 			resultCount++
-			if int(collectCount) == len(e.Metrics)-len(e.Config.ExcludeList){ //if resultCount == collectCount {
+			if resultCount == collectCount {//if int(collectCount) == int(len(e.Metrics))-int(len(e.Config.ExcludeList)){
 				log.Info("Done collectin'")
 				httpTransport.CloseIdleConnections()
 				return
@@ -225,3 +227,4 @@ func doHTTPAndProcess(e *Exporter, metric lib.SonusMetric, ctx lib.MetricContext
 		}(metric, ctx, response)
 	}
 }
+

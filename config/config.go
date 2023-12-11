@@ -17,6 +17,7 @@ type Config struct {
 	APIPass            string
 	APIAddressContexts []string
 	APITimeout         time.Duration
+	ExcludeList	   []string
 }
 
 // Init populates the Config struct based on environmental runtime configuration
@@ -26,6 +27,8 @@ func Init() Config {
 	rawURLs := cfg.GetEnv("API_URLS", "https://172.16.7.2/api")
 	rawACs := cfg.GetEnv("API_ADDRESSCONTEXTS", "default")
 	rawTimeout := cfg.GetEnv("API_TIMEOUT", "10")
+	excludeString := cfg.GetEnv("EXCLUDE_LIST", "")
+	excludeList := strings.Split(excludeString, ",")
 
 	user := os.Getenv("API_USER")
 	pass := os.Getenv("API_PASSWORD")
@@ -47,6 +50,7 @@ func Init() Config {
 		pass,
 		addressContexts,
 		timeout,
+		excludeList,
 	}
 
 	return appConfig
@@ -57,7 +61,8 @@ func GetConfig() Config {
 	rawURLs := cfg.GetEnv("API_URLS", "https://172.16.7.2/api")
 	rawACs := cfg.GetEnv("API_ADDRESSCONTEXTS", "default")
 	rawTimeout := cfg.GetEnv("API_TIMEOUT", "10")
-
+	excludeString := cfg.GetEnv("EXCLUDE_LIST", "")
+        excludeList := strings.Split(excludeString, ",")
 	user := os.Getenv("API_USER")
 	pass := os.Getenv("API_PASSWORD")
 
@@ -78,6 +83,7 @@ func GetConfig() Config {
 		pass,
 		addressContexts,
 		timeout,
+		excludeList,
 	}
 
 	return appConfig
