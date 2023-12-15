@@ -8,7 +8,7 @@ compatible endpoint.  Based on the [sonus-metrics-exporter](https://github.com/t
 This exporter is setup to take input from environment variables:
 
 ### Required
-* `API_URLS` Space-separated list of URLs for the Ribbon RESTCONF API to be tried in order.  Should appear as `https://{ip1}/api https://{ip2}/restconf/data/`
+* `API_URLS` Space-separated list of URLs for the Ribbon RESTCONF API to be tried in order.  Should appear as `https://{ip1}/`
 * `API_USER` The username to use when logging in to the Ribbon RESTCONF API.
 * `API_PASSWORD` The password to use when authenticating to the Ribbon RESTCONF.
 
