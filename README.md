@@ -21,7 +21,7 @@ This exporter is setup to take input from environment variables:
 
 * 
 * `EXCLUDE_LIST` You can choose to exclude any collector by adding its name to the list. The following excludes all collectors. For example:
-``` docker run --restart=always -p 4123:9172 -e API_USER="" -e API_PASSWORD="" -e API_URLS="https://domainurl.com" -e API_ADDRESSCONTEXTS="PROD" -e EXCLUDE_LIST="CPU,DiskStatus,DSP,Fan,SyncStatus,IpPolicingAlarmStatus,Memory,MgmtPortStatus,PacketPortStatus,hardDiskUsage,PowerSupply,ServerSoftWareUpgradeStatus,SIP ARS,SipStatistic,TrunkGroup" ribbon-core-exporter ```
+``` docker run --restart=always -p 4123:9172 -e API_USER="" -e API_PASSWORD="" -e API_URLS="https://domainurl.com" -e API_ADDRESSCONTEXTS="PROD" -e EXCLUDE_LIST="CPU,DiskStatus,hardDiskUsage,DSP,Fan,SyncStatus,IpPolicingAlarmStatus,Memory,MgmtPortStatus,PacketPortStatus,PowerSupply,ServerSoftWareUpgradeStatus,SIP ARS,SipStatistic,TrunkGroup" ribbon-core-exporter ```
 
 
 ## Install and deploy
